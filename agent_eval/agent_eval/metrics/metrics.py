@@ -54,7 +54,10 @@ def summarize(reports: List[EvalReport], k: int, k_scope: str = "same-task k ind
             "pass_consecutive_k": pass_consecutive_k(successes, k),
         }
         for r in reps:
-            by_cap.setdefault(r.capability, []).append(r.passed)
+            # capability may be a list (multi-capability) or a bare string (legacy)
+            caps = r.capability if isinstance(r.capability, (list, tuple)) else [r.capability]
+            for cap in caps:
+                by_cap.setdefault(cap, []).append(r.passed)
             if r.first_error_step is not None:
                 first_errors[r.case_id] = r.first_error_step
 

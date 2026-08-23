@@ -52,7 +52,7 @@ class ReferenceAgent:
 
     def run(self, instance: TaskInstance, env: ToolCallingEnv) -> Trajectory:
         traj = Trajectory()
-        cap = instance.capability
+        cap = instance.capability[0] if instance.capability else ""
         if cap == "tool_call":
             self._tool_call(instance, env, traj)
         elif cap == "state_read":
@@ -139,7 +139,7 @@ class BuggyAgent(ReferenceAgent):
         super().__init__(name="buggy")
 
     def run(self, instance, env):
-        cap = instance.capability
+        cap = instance.capability[0] if instance.capability else ""
         traj = Trajectory()
         if cap == "confirm":
             kind, target = _DESTRUCTIVE[instance.template_id]

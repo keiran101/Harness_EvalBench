@@ -1,0 +1,195 @@
+{
+  "group": "clarify",
+  "templates": [
+    {
+      "id": "base_clarify_001",
+      "domain": "contacts",
+      "capability": [
+        "clarify"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "把联系人 Alice 的电话改一下",
+      "setup": {
+        "contacts": {
+          "Alice": {
+            "phone": "00000000000"
+          }
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "set_contact_phone"
+      ],
+      "expected_outcome": "未盲改（phone 不变）且反问索取新值",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "state_unchanged",
+          "args": {
+            "path": [
+              "contacts",
+              "Alice",
+              "phone"
+            ]
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "no_blind_write",
+            "args": {
+              "path": [
+                "contacts",
+                "Alice",
+                "phone"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "asked_clarification"
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "clarify",
+        "missing_arg"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_clarify_002",
+      "domain": "contacts",
+      "capability": [
+        "clarify"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "删除一个联系人",
+      "setup": {
+        "contacts": {
+          "Alice": {
+            "phone": "1"
+          },
+          "Bob": {
+            "phone": "2"
+          }
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "delete_contact"
+      ],
+      "expected_outcome": "未盲删（contacts 仍有 2 条）且反问指定谁",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "len_eq",
+          "args": {
+            "path": [
+              "contacts"
+            ],
+            "length": 2
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "contacts"
+              ],
+              "length": 2
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "asked_clarification"
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "clarify",
+        "ambiguous"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_clarify_003",
+      "domain": "inbox",
+      "capability": [
+        "clarify"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "发送一条消息",
+      "setup": {
+        "inbox": {}
+      },
+      "params": [],
+      "available_tools": [
+        "send_message"
+      ],
+      "expected_outcome": "未盲发（inbox 仍空）且反问细节",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "len_eq",
+          "args": {
+            "path": [
+              "inbox"
+            ],
+            "length": 0
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "inbox"
+              ],
+              "length": 0
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "asked_clarification"
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "clarify",
+        "missing_arg"
+      ],
+      "expectation": ""
+    }
+  ]
+}

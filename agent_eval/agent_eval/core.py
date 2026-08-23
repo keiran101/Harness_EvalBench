@@ -44,17 +44,18 @@ def first_error_step(traj: Trajectory) -> Optional[int]:
 
 @dataclass
 class VerificationResult:
-    """Outcome of running the FAIL_TO_PASS / PASS_TO_PASS verifier on a final state."""
+    """Outcome of running the verifier on a final state."""
     passed: bool
     fail_to_pass: dict        # name -> bool  (must become True after success)
     pass_to_pass: dict        # name -> bool  (must stay True)
+    must_not_do: dict = field(default_factory=dict)  # name -> bool  (HARD VETO)
 
 
 @dataclass
 class EvalReport:
     case_id: str
     tier: str
-    capability: str
+    capability: list          # list of capabilities exercised
     passed: bool
     first_error_step: Optional[int]
     metrics: dict = field(default_factory=dict)

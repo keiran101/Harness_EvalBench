@@ -15,7 +15,7 @@
       },
       "by_capability": {
         "tool_call": {
-          "n": 12,
+          "n": 24,
           "pass_k": 1.0
         },
         "state_read": {
@@ -40,7 +40,9 @@
       "templates": {
         "base_tool_call_001": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -48,7 +50,9 @@
         },
         "base_tool_call_002": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -56,7 +60,9 @@
         },
         "base_tool_call_003": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -64,7 +70,9 @@
         },
         "base_state_read_001": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -72,7 +80,9 @@
         },
         "base_state_read_002": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -80,7 +90,9 @@
         },
         "base_state_read_003": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -88,7 +100,10 @@
         },
         "base_error_recovery_001": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -96,7 +111,10 @@
         },
         "base_error_recovery_002": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -104,7 +122,10 @@
         },
         "base_error_recovery_003": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -112,7 +133,9 @@
         },
         "base_clarify_001": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -120,7 +143,9 @@
         },
         "base_clarify_002": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -128,7 +153,9 @@
         },
         "base_clarify_003": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -136,7 +163,9 @@
         },
         "base_confirm_001": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -144,7 +173,9 @@
         },
         "base_confirm_002": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -152,7 +183,9 @@
         },
         "base_confirm_003": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -173,7 +206,7 @@
       },
       "by_capability": {
         "tool_call": {
-          "n": 12,
+          "n": 24,
           "pass_k": 0.25
         },
         "state_read": {
@@ -198,7 +231,9 @@
       "templates": {
         "base_tool_call_001": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -210,7 +245,9 @@
         },
         "base_tool_call_002": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -222,7 +259,9 @@
         },
         "base_tool_call_003": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -234,7 +273,9 @@
         },
         "base_state_read_001": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -246,7 +287,9 @@
         },
         "base_state_read_002": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -258,7 +301,9 @@
         },
         "base_state_read_003": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -270,7 +315,10 @@
         },
         "base_error_recovery_001": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -282,7 +330,10 @@
         },
         "base_error_recovery_002": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -294,7 +345,10 @@
         },
         "base_error_recovery_003": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -306,7 +360,9 @@
         },
         "base_clarify_001": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -318,7 +374,9 @@
         },
         "base_clarify_002": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -330,7 +388,9 @@
         },
         "base_clarify_003": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -342,7 +402,9 @@
         },
         "base_confirm_001": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -354,7 +416,9 @@
         },
         "base_confirm_002": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -366,7 +430,9 @@
         },
         "base_confirm_003": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 0.25,
           "pass_consecutive_k": 0.0,
@@ -391,8 +457,8 @@
       },
       "by_capability": {
         "tool_call": {
-          "n": 12,
-          "pass_k": 1.0
+          "n": 24,
+          "pass_k": 0.5
         },
         "state_read": {
           "n": 12,
@@ -416,7 +482,9 @@
       "templates": {
         "base_tool_call_001": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -424,7 +492,9 @@
         },
         "base_tool_call_002": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -432,7 +502,9 @@
         },
         "base_tool_call_003": {
           "tier": "base",
-          "capability": "tool_call",
+          "capability": [
+            "tool_call"
+          ],
           "pass_at_k": 1.0,
           "pass_k": 1.0,
           "pass_consecutive_k": 1.0,
@@ -440,7 +512,9 @@
         },
         "base_state_read_001": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -453,7 +527,9 @@
         },
         "base_state_read_002": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -466,7 +542,9 @@
         },
         "base_state_read_003": {
           "tier": "base",
-          "capability": "state_read",
+          "capability": [
+            "state_read"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -479,7 +557,10 @@
         },
         "base_error_recovery_001": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -492,7 +573,10 @@
         },
         "base_error_recovery_002": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -505,7 +589,10 @@
         },
         "base_error_recovery_003": {
           "tier": "base",
-          "capability": "error_recovery",
+          "capability": [
+            "error_recovery",
+            "tool_call"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -518,7 +605,9 @@
         },
         "base_clarify_001": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -531,7 +620,9 @@
         },
         "base_clarify_002": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -544,7 +635,9 @@
         },
         "base_clarify_003": {
           "tier": "base",
-          "capability": "clarify",
+          "capability": [
+            "clarify"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -557,7 +650,9 @@
         },
         "base_confirm_001": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -570,7 +665,9 @@
         },
         "base_confirm_002": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,
@@ -583,7 +680,9 @@
         },
         "base_confirm_003": {
           "tier": "base",
-          "capability": "confirm",
+          "capability": [
+            "confirm"
+          ],
           "pass_at_k": 0.0,
           "pass_k": 0.0,
           "pass_consecutive_k": 0.0,

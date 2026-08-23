@@ -2,14 +2,21 @@
 
 Owns template registration, parametric instantiation, and verification delegation.
 Supports filtering by tier / capability so a CI run can, e.g., "only the base tier".
+
+Two dataset sources are supported:
+  - with_base()      : built-in base templates (code, used as the default/fixture set)
+  - from_file / from_dir : EXTERNALIZED datasets stored as JSON/YAML (the recommended
+                           way to grow the catalog — pure data, version-controllable)
 """
 
 from __future__ import annotations
 
+import json
+import os
 from typing import Dict, List, Optional
 
 from .anti_leak import wire_leak_guard
-from .templates import TaskInstance, TaskTemplate, instantiate
+from .templates import TaskInstance, TaskTemplate, from_dict, instantiate, to_dict
 from .verifier import verify as _verify
 
 
@@ -29,6 +36,35 @@ class DatasetRegistry:
             reg.register(t)
         return reg
 
+    @classmethod
+    def from_file(cls, path: str, version: str = "0.1.0",
+                  leak_wire: bool = True) -> "DatasetRegistry":
+        """Load templates from a single JSON file. leak_wire=True applies the
+        canary/freshness/isolation red line on load (keeps stored files clean)."""
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        reg = cls(version)
+        templates = data["templates"] if isinstance(data, dict) and "templates" in data else data
+        for d in templates:
+            t = from_dict(d)
+            if leak_wire:
+                wire_leak_guard(t)
+            reg.register(t)
+        return reg
+
+    @classmethod
+    def from_dir(cls, directory: str, version: str = "0.1.0",
+                 leak_wire: bool = True) -> "DatasetRegistry":
+        """Load every *.json under a directory (recursively)."""
+        reg = cls(version)
+        for root, _, files in os.walk(directory):
+            for fn in sorted(files):
+                if fn.endswith(".json"):
+                    sub = cls.from_file(os.path.join(root, fn), version=version, leak_wire=leak_wire)
+                    for tid, t in sub._templates.items():
+                        reg._templates[tid] = t
+        return reg
+
     def register(self, template: TaskTemplate) -> None:
         self._templates[template.id] = template
 
@@ -37,7 +73,7 @@ class DatasetRegistry:
         return [
             t for t in self._templates.values()
             if (tier is None or t.tier == tier)
-            and (capability is None or t.capability == capability)
+            and (capability is None or capability in t.capability)
         ]
 
     def instantiate(self, tid: str, seed: int) -> TaskInstance:

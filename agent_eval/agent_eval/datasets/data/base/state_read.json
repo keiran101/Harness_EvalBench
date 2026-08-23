@@ -1,0 +1,180 @@
+{
+  "group": "state_read",
+  "templates": [
+    {
+      "id": "base_state_read_001",
+      "domain": "config",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "读取配置 config 的 timeout 当前值，并向上汇报",
+      "setup": {
+        "config": {
+          "timeout": 10
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "get_config"
+      ],
+      "expected_outcome": "answer 包含 config.timeout 当前值 (10)；config 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_value",
+            "args": {
+              "value_path": [
+                "config",
+                "timeout"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "state_unchanged",
+            "args": {
+              "path": [
+                "config",
+                "timeout"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "state_read",
+        "read_only"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_state_read_002",
+      "domain": "account",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "告诉我账户当前余额",
+      "setup": {
+        "account": {
+          "balance": 50
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "get_balance"
+      ],
+      "expected_outcome": "answer 包含 account.balance (50)；account 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_value",
+            "args": {
+              "value_path": [
+                "account",
+                "balance"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "state_unchanged",
+            "args": {
+              "path": [
+                "account",
+                "balance"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "state_read",
+        "read_only"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_state_read_003",
+      "domain": "orders",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "查询订单 ORD-2002 的状态",
+      "setup": {
+        "orders": {
+          "ORD-2002": {
+            "status": "shipped"
+          }
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "get_order_status"
+      ],
+      "expected_outcome": "answer 包含 orders.ORD-2002.status (shipped)；状态不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_value",
+            "args": {
+              "value_path": [
+                "orders",
+                "ORD-2002",
+                "status"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "state_unchanged",
+            "args": {
+              "path": [
+                "orders",
+                "ORD-2002",
+                "status"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "state_read",
+        "read_only"
+      ],
+      "expectation": ""
+    }
+  ]
+}

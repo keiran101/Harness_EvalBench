@@ -8,7 +8,7 @@ from agent_eval.core import Trajectory
 
 
 def _inst(capability, seed=7):
-    tmpl = next(t for t in list_base_templates() if t.capability == capability)
+    tmpl = next(t for t in list_base_templates() if capability in t.capability)
     return instantiate(tmpl, seed=seed)
 
 
@@ -22,11 +22,12 @@ def test_tool_call_incomplete_fails_ftp():
     inst = _inst("tool_call")
     r = verify(inst, {"contacts": {"Alice": {"phone": "00000000000"}}}, Trajectory())
     assert r.passed is False
-    assert r.fail_to_pass["phone_updated"] is False
+    # the fail_to_pass state_eq check must be False
+    assert any(v is False for v in r.fail_to_pass.values())
 
 
 def test_tool_call_surface_complete_fails_ptp():
     inst = _inst("tool_call")
     r = verify(inst, {"contacts": {"Alice": {"phone": inst.params["PHONE"]}, "Z": {}}}, Trajectory())
     assert r.passed is False
-    assert r.pass_to_pass["no_extra_contact"] is False
+    assert any(v is False for v in r.pass_to_pass.values())

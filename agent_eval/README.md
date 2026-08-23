@@ -38,15 +38,22 @@ demo 输出（k=4，15 个 base 模板）：
 - 三档按**步骤数/工具数**递增：base 1–2步/1工具、Middle 3–5步/2–3工具、hard 6+步/多工具+陷阱。
 - **base 档 5 类基础 harness 能力**（每类 3 模板）：`tool_call` 工具调用正确性 · `state_read` 行动前读状态 · `error_recovery` 失败重试 · `clarify` 缺失信息反问 · `confirm` 危险动作前确认。
 - **验证器双检**：`FAIL_TO_PASS`（问题真被解决）+ `PASS_TO_PASS`（没引入回归），全过才判成功，二元奖励。
-- **评测单元 Schema（单一类型）**：`TaskTemplate`（可复用模板）→ `TaskInstance`（实例化后唯一评测单元，含 id/template_id/tier/capability/instruction/setup/params/verifier/leak_guard/tags/expectation）。闭环边界集也产出 `TaskInstance`，无第二套 schema。
-- **防泄漏红线（已接线）**：`DatasetRegistry.with_base()` 会对每个模板自动 `wire_leak_guard`——canary GUID（同时嵌入 instruction 作诱饵，模型若输出即证污染）+ 时间新鲜度 + 隔离标记；外加随机实例参数。可复用的是**环境的构造机制**，不是具体题目。
-- `DatasetRegistry`：版本化、tier/capability 过滤、leak_guard 元数据。
+- **评测单元 Schema（单一类型，v2）**：`TaskTemplate`（可复用模板）→ `TaskInstance`（实例化后唯一评测单元）。字段：`id/template_id/domain/capability[]/tier/difficulty/steps/tools/instruction/setup/params/available_tools/expected_outcome/must_do/must_not_do/verifier/grader/leak_guard/tags/expectation`。
+  - `capability` 是**数组**（一个任务可考察多个能力）；`domain` 独立业务域；`difficulty`（easy/medium/hard）与 `tier`（结构复杂度）正交。
+  - **硬否决 `must_not_do`**：任一为 False（不安全）即整体失败，对应"不可逆动作未经确认"等红线；与 `fail_to_pass`/`pass_to_pass` 并列。
+  - `available_tools` 声明该任务暴露的工具面（防作弊+可复现）；`grader` 自描述评分方式（rule/llm/custom）。
+  - 检查以 **check spec** 表达：`{"fn": <注册名>, "args": {...}}`，逻辑在 `datasets/checks.py` 的 `CHECK_REGISTRY`，故数据集文件可纯数据序列化。
+- **数据集外置存储**：base 15 个模板已从代码拆出，存于 `agent_eval/datasets/data/base/*.json`（每能力一文件，版本可控、可 diff）。`DatasetRegistry.from_file/from_dir` 加载；`with_base()` 仍作为内置默认集。加载时自动 `wire_leak_guard`（canary/新鲜度/隔离）。
+- **防泄漏红线（已接线）**：canary GUID（同时嵌入 instruction 作诱饵）+ 时间新鲜度 + 隔离标记 + 随机实例参数。可复用的是**环境的构造机制**，不是具体题目。
 
 ```python
 from agent_eval.datasets.registry import DatasetRegistry
+# 内置默认集
 reg = DatasetRegistry.with_base()
+# 或外置文件集（推荐增长方式）
+reg = DatasetRegistry.from_dir("agent_eval/datasets/data/base")
 inst = reg.instantiate("base_tool_call_001", seed=7)   # 参数化实例
-result = reg.verify(inst, final_state, trajectory)      # 双检验证
+result = reg.verify(inst, final_state, trajectory)      # 双检 + 硬否决
 ```
 
 ## 如何接入真实系统

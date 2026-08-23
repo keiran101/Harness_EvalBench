@@ -1,0 +1,207 @@
+{
+  "group": "tool_call",
+  "templates": [
+    {
+      "id": "base_tool_call_001",
+      "domain": "contacts",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "将联系人 Alice 的电话改为 [PHONE]",
+      "setup": {
+        "contacts": {
+          "Alice": {
+            "phone": "00000000000"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "PHONE",
+          "generator": "phone"
+        }
+      ],
+      "available_tools": [
+        "set_contact_phone"
+      ],
+      "expected_outcome": "contacts.Alice.phone == [PHONE]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "contacts",
+                "Alice",
+                "phone"
+              ],
+              "value": "[PHONE]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "contacts"
+              ],
+              "value": "Alice"
+            }
+          },
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "contacts"
+              ],
+              "length": 1
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "tool_call",
+        "single_step"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_tool_call_002",
+      "domain": "orders",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "将订单 ORD-1001 的状态标记为 shipped",
+      "setup": {
+        "orders": {
+          "ORD-1001": {
+            "status": "pending"
+          }
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "set_order_status"
+      ],
+      "expected_outcome": "orders.ORD-1001.status == 'shipped'",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "orders",
+                "ORD-1001",
+                "status"
+              ],
+              "value": "shipped"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "orders"
+              ],
+              "length": 1
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "tool_call",
+        "state_transition"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_tool_call_003",
+      "domain": "files",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "把文件 report.txt 的权限设为 [PERM]",
+      "setup": {
+        "files": {
+          "report.txt": {
+            "perm": "rw"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "PERM",
+          "generator": "perm"
+        }
+      ],
+      "available_tools": [
+        "set_file_perm"
+      ],
+      "expected_outcome": "files.report.txt.perm == [PERM]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "files",
+                "report.txt",
+                "perm"
+              ],
+              "value": "{PERM}"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "files"
+              ],
+              "length": 1
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "tool_call",
+        "single_step"
+      ],
+      "expectation": ""
+    }
+  ]
+}

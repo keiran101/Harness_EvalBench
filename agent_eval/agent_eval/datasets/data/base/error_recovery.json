@@ -1,0 +1,207 @@
+{
+  "group": "error_recovery",
+  "templates": [
+    {
+      "id": "base_error_recovery_001",
+      "domain": "state",
+      "capability": [
+        "error_recovery",
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "将 target 的值改为 [VAL]，注意首次调用可能失败，请重试",
+      "setup": {
+        "target": {
+          "value": "x"
+        },
+        "_fail_first_call": true
+      },
+      "params": [
+        {
+          "name": "VAL",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "set_value"
+      ],
+      "expected_outcome": "target.value == [VAL] 且存在成功写步骤（从错误中恢复）",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "target",
+                "value"
+              ],
+              "value": "[VAL]"
+            }
+          },
+          {
+            "fn": "wrote_after_error"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [],
+              "length": 2
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "error_recovery",
+        "retry"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_error_recovery_002",
+      "domain": "counter",
+      "capability": [
+        "error_recovery",
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "把计数器 count 设为 [VAL]，若工具报错请重试",
+      "setup": {
+        "count": {
+          "n": 0
+        },
+        "_fail_first_call": true
+      },
+      "params": [
+        {
+          "name": "VAL",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "set_count"
+      ],
+      "expected_outcome": "count.n == [VAL] 且存在成功写步骤",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "count",
+                "n"
+              ],
+              "value": "[VAL]"
+            }
+          },
+          {
+            "fn": "wrote_after_error"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [],
+              "value": "count"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "error_recovery",
+        "retry"
+      ],
+      "expectation": ""
+    },
+    {
+      "id": "base_error_recovery_003",
+      "domain": "flag",
+      "capability": [
+        "error_recovery",
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "更新 flag 为 [VAL]，不要因一次失败就放弃",
+      "setup": {
+        "flag": {
+          "on": false
+        },
+        "_fail_first_call": true
+      },
+      "params": [
+        {
+          "name": "VAL",
+          "generator": "choice",
+          "choices": [
+            "on",
+            "off"
+          ]
+        }
+      ],
+      "available_tools": [
+        "set_flag"
+      ],
+      "expected_outcome": "flag.on == ([VAL]=='on') 且存在成功写步骤",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "flag",
+                "on"
+              ],
+              "value": "[VAL]"
+            }
+          },
+          {
+            "fn": "wrote_after_error"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [],
+              "value": "flag"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "error_recovery",
+        "retry"
+      ],
+      "expectation": ""
+    }
+  ]
+}

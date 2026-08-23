@@ -21,9 +21,10 @@ def test_list_base_all():
 
 def test_filter_by_capability():
     r = _reg()
-    tc = r.list_templates(capability="tool_call")
-    assert len(tc) == 3
-    assert all(t.capability == "tool_call" for t in tc)
+    # capability is a list now; error_recovery templates carry [error_recovery, tool_call]
+    er = r.list_templates(capability="error_recovery")
+    assert len(er) == 3
+    assert all("error_recovery" in t.capability for t in er)
 
 
 def test_instantiate_carries_leak_guard_and_diverse_seed():
@@ -58,3 +59,15 @@ def test_all_base_templates_leak_wired():
         assert t.leak_guard.get("isolation") is True
         assert "canary" in t.leak_guard
         assert t.leak_guard["canary"] in t.instruction
+
+
+def test_load_from_external_dir_matches_code():
+    """Externalized datasets (JSON) reload identically to the built-in code set."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(here, "..", "agent_eval", "datasets", "data", "base")
+    reg = DatasetRegistry.from_dir(data_dir, version="ext")
+    assert len(reg.list_templates()) == 15
+    # leak_guard is wired on load even though files are clean
+    inst = reg.instantiate("base_tool_call_001", seed=1)
+    assert inst.leak_guard["canary"].startswith("CANARY-")
+    assert inst.leak_guard["canary"] in inst.instruction
