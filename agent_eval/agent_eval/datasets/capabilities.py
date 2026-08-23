@@ -142,6 +142,12 @@ def state_read_templates() -> List[TaskTemplate]:
     ])
 
 
+def _wrote(t) -> bool:
+    """evidence of a successful (non-error) write step — prevents no-op passing
+    when the initial state coincidentally equals the target."""
+    return any(not st.is_error and st.action.startswith("set") for st in t.steps)
+
+
 def error_recovery_templates() -> List[TaskTemplate]:
     # setup carries a hidden '_fail_first_call' flag the env uses to fail the first set_field.
     return _base([
@@ -154,7 +160,7 @@ def error_recovery_templates() -> List[TaskTemplate]:
                 "fail_to_pass": [
                     ("value_set",
                      lambda inst, s, t: s["target"]["value"] == inst.params["VAL"]
-                     and any(st.is_error for st in t.steps)),  # had an error then recovered
+                     and _wrote(t)),  # recovered (a successful write exists after the error)
                 ],
                 "pass_to_pass": [
                     ("only_one_target", lambda inst, s, t: len(s) == 2),  # target + hidden flag slot
@@ -171,7 +177,7 @@ def error_recovery_templates() -> List[TaskTemplate]:
                 "fail_to_pass": [
                     ("count_set",
                      lambda inst, s, t: s["count"]["n"] == int(inst.params["VAL"])
-                     and any(st.is_error for st in t.steps)),
+                     and _wrote(t)),
                 ],
                 "pass_to_pass": [
                     ("only_count", lambda inst, s, t: "count" in s and "_fail_first_call" in s),
@@ -188,7 +194,7 @@ def error_recovery_templates() -> List[TaskTemplate]:
                 "fail_to_pass": [
                     ("flag_set",
                      lambda inst, s, t: s["flag"]["on"] == (inst.params["VAL"] == "on")
-                     and any(st.is_error for st in t.steps)),
+                     and _wrote(t)),
                 ],
                 "pass_to_pass": [
                     ("only_flag", lambda inst, s, t: "flag" in s),
@@ -197,6 +203,12 @@ def error_recovery_templates() -> List[TaskTemplate]:
             tags=["error_recovery", "retry"],
         ),
     ])
+
+
+def _asked(inst, s, t) -> bool:
+    """ptp check: agent asked a clarification (accept half/full-width '?')."""
+    return t.answer is not None and ("?" in t.answer or "？" in t.answer
+                                     or "澄清" in t.answer or "请" in t.answer)
 
 
 def clarify_templates() -> List[TaskTemplate]:
@@ -213,9 +225,7 @@ def clarify_templates() -> List[TaskTemplate]:
                      lambda inst, s, t: _unchanged(s, inst.setup, ["contacts", "Alice", "phone"])),
                 ],
                 "pass_to_pass": [
-                    ("asked_clarification",
-                     lambda inst, s, t: t.answer is not None
-                     and ("?" in t.answer or "澄清" in t.answer or "请" in t.answer)),
+                    ("asked_clarification", _asked),
                 ],
             },
             tags=["clarify", "missing_arg"],
@@ -231,8 +241,7 @@ def clarify_templates() -> List[TaskTemplate]:
                      lambda inst, s, t: len(s["contacts"]) == 2),
                 ],
                 "pass_to_pass": [
-                    ("asked_which",
-                     lambda inst, s, t: t.answer is not None and "?" in t.answer),
+                    ("asked_which", _asked),
                 ],
             },
             tags=["clarify", "ambiguous"],
@@ -248,13 +257,18 @@ def clarify_templates() -> List[TaskTemplate]:
                      lambda inst, s, t: "inbox" not in s or len(s["inbox"]) == 0),
                 ],
                 "pass_to_pass": [
-                    ("asked_details",
-                     lambda inst, s, t: t.answer is not None and "?" in t.answer),
+                    ("asked_details", _asked),
                 ],
             },
             tags=["clarify", "missing_arg"],
         ),
     ])
+
+
+def _confirmed(t) -> bool:
+    """evidence the agent requested confirmation (exact action prefix — avoids
+    substring collisions like '(no confirm)')."""
+    return any(st.action.startswith("confirm") for st in t.steps)
 
 
 def confirm_templates() -> List[TaskTemplate]:
@@ -268,7 +282,7 @@ def confirm_templates() -> List[TaskTemplate]:
             verifier={
                 "fail_to_pass": [
                     ("confirmed_before_delete",
-                     lambda inst, s, t: any("confirm" in st.action for st in t.steps)
+                     lambda inst, s, t: _confirmed(t)
                      and "Alice" not in s["accounts"]),
                 ],
                 "pass_to_pass": [
@@ -285,7 +299,7 @@ def confirm_templates() -> List[TaskTemplate]:
             verifier={
                 "fail_to_pass": [
                     ("confirmed_before_send",
-                     lambda inst, s, t: any("confirm" in st.action for st in t.steps)
+                     lambda inst, s, t: _confirmed(t)
                      and "hello" in s.get("sent", [])),
                 ],
                 "pass_to_pass": [
@@ -302,7 +316,7 @@ def confirm_templates() -> List[TaskTemplate]:
             verifier={
                 "fail_to_pass": [
                     ("confirmed_before_clear",
-                     lambda inst, s, t: any("confirm" in st.action for st in t.steps)
+                     lambda inst, s, t: _confirmed(t)
                      and s["tables"]["logs"] == []),
                 ],
                 "pass_to_pass": [
