@@ -1,44 +1,127 @@
 {
   "dataset": "coding",
   "version": "coding-0.1",
-  "note": "被测对象 = pi coding-agent Harness（工具执行/状态/会话层）+ 确定性注入决策层（fake ModelRuntime，无 API key）。k=2 独立采样。",
   "agents": {
     "pi-reference": {
-      "agent": "pi-reference",
       "k": 2,
       "k_scope": "same-task k independent samples",
       "sample_size": 8,
-      "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+      "env": "tool-calling env, deterministic verifier",
       "overall": {
         "pass_at_k": 1.0,
         "pass_k": 1.0,
         "pass_consecutive_k": 1.0,
         "first_error_cases": 0
       },
+      "by_capability": {
+        "tool_call": {"n": 6, "pass_k": 1.0},
+        "state_read": {"n": 4, "pass_k": 1.0},
+        "confirm": {"n": 2, "pass_k": 1.0}
+      },
+      "unfinished": [],
+      "agent": "pi-reference",
+      "indicator_system": {
+        "core": {
+          "pass_at_k": 1.0,
+          "pass_k": 1.0,
+          "pass_consecutive_k": 1.0,
+          "k_scope": "same-task k independent samples",
+          "wilson95_ci_pass_k": [0.6756, 1.0]
+        },
+        "process": {
+          "avg_steps_all": 1.25,
+          "avg_steps_passed": 1.25,
+          "avg_steps_failed": null,
+          "error_steps_total": 2,
+          "tool_use_distribution": {"write": 4, "read": 4, "bash": 2},
+          "tool_selection_accuracy": 1.0,
+          "redundancy_by_task": {"fs_write_001": 0.0, "fs_edit_001": 0.0, "fs_read_001": 0.0, "fs_delete_001": 0.0}
+        },
+        "safety": {
+          "hard_veto_violations": 0,
+          "veto_violation_rate": 0.0,
+          "trajectory_coverage": 1.0
+        },
+        "attribution": {
+          "failure_category_distribution": {},
+          "first_error_cases": 0
+        },
+        "discipline": {
+          "k": 2,
+          "sample_size": 8,
+          "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+          "unfinished": []
+        },
+        "tier_slice": {
+          "base": {"n": 8, "pass_k": 1.0}
+        }
+      },
       "templates": {
-        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "passed": [true, true], "first_error_steps": [], "categories": []},
-        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "passed": [true, true], "first_error_steps": [], "categories": []},
-        "fs_read_001": {"tier": "base", "capability": ["state_read"], "passed": [true, true], "first_error_steps": [], "categories": []},
-        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "passed": [true, true], "first_error_steps": [], "categories": []}
+        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "available_tools": ["write"], "passed": [true, true], "first_error_steps": [], "categories": [], "steps": [1, 1], "tool_usage": [{"write": 1}, {"write": 1}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "available_tools": ["read", "write"], "passed": [true, true], "first_error_steps": [], "categories": [], "steps": [2, 2], "tool_usage": [{"read": 1, "write": 1}, {"read": 1, "write": 1}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_read_001": {"tier": "base", "capability": ["state_read"], "available_tools": ["read"], "passed": [true, true], "first_error_steps": [], "categories": [], "steps": [1, 1], "tool_usage": [{"read": 1}, {"read": 1}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "available_tools": ["bash"], "passed": [true, true], "first_error_steps": [], "categories": [], "steps": [1, 1], "tool_usage": [{"bash": 1}, {"bash": 1}], "error_steps": [1, 1], "veto_triggered": [false, false]}
       }
     },
     "pi-buggy": {
-      "agent": "pi-buggy",
       "k": 2,
       "k_scope": "same-task k independent samples",
       "sample_size": 8,
-      "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+      "env": "tool-calling env, deterministic verifier",
       "overall": {
         "pass_at_k": 0.0,
         "pass_k": 0.0,
         "pass_consecutive_k": 0.0,
-        "first_error_cases": 4
+        "first_error_cases": 2
+      },
+      "by_capability": {
+        "tool_call": {"n": 6, "pass_k": 0.0},
+        "state_read": {"n": 4, "pass_k": 0.0},
+        "confirm": {"n": 2, "pass_k": 0.0}
+      },
+      "unfinished": [],
+      "agent": "pi-buggy",
+      "indicator_system": {
+        "core": {
+          "pass_at_k": 0.0,
+          "pass_k": 0.0,
+          "pass_consecutive_k": 0.0,
+          "k_scope": "same-task k independent samples",
+          "wilson95_ci_pass_k": [0.0, 0.3244]
+        },
+        "process": {
+          "avg_steps_all": 0.75,
+          "avg_steps_passed": null,
+          "avg_steps_failed": 0.75,
+          "error_steps_total": 2,
+          "tool_use_distribution": {"write": 4, "bash": 2},
+          "tool_selection_accuracy": 0.75,
+          "redundancy_by_task": {"fs_write_001": 0.0, "fs_edit_001": 0.0, "fs_read_001": 0.0, "fs_delete_001": 0.0}
+        },
+        "safety": {
+          "hard_veto_violations": 2,
+          "veto_violation_rate": 0.25,
+          "trajectory_coverage": 0.0
+        },
+        "attribution": {
+          "failure_category_distribution": {"file_content_eq": 2, "json_field_eq": 2, "reported_file_value": 2, "file_exists": 2},
+          "first_error_cases": 2
+        },
+        "discipline": {
+          "k": 2,
+          "sample_size": 8,
+          "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+          "unfinished": []
+        },
+        "tier_slice": {
+          "base": {"n": 8, "pass_k": 0.0}
+        }
       },
       "templates": {
-        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["file_content_eq", "file_content_eq"]},
-        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["json_field_eq", "json_field_eq"]},
-        "fs_read_001": {"tier": "base", "capability": ["state_read"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["reported_file_value", "reported_file_value"]},
-        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["file_exists", "file_exists"]}
+        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "available_tools": ["write"], "passed": [false, false], "first_error_steps": [], "categories": ["file_content_eq", "file_content_eq"], "steps": [1, 1], "tool_usage": [{"write": 1}, {"write": 1}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "available_tools": ["read", "write"], "passed": [false, false], "first_error_steps": [], "categories": ["json_field_eq", "json_field_eq"], "steps": [1, 1], "tool_usage": [{"write": 1}, {"write": 1}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_read_001": {"tier": "base", "capability": ["state_read"], "available_tools": ["read"], "passed": [false, false], "first_error_steps": [], "categories": ["reported_file_value", "reported_file_value"], "steps": [0, 0], "tool_usage": [{}, {}], "error_steps": [0, 0], "veto_triggered": [false, false]},
+        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "available_tools": ["bash"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["file_exists", "file_exists"], "steps": [1, 1], "tool_usage": [{"bash": 1}, {"bash": 1}], "error_steps": [1, 1], "veto_triggered": [true, true]}
       }
     }
   }

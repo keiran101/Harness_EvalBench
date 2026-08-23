@@ -156,21 +156,46 @@ extensions.eval 稍好：`output()` 返回结构化布尔（systemPromptHasGuide
 
 注入方式（关键）：pi 的 `AgentSession` 把 LLM 调用抽象为 `modelRuntime.streamSimple(...)`；我们向 `createAgentSessionServices({modelRuntime: fake})` 注入一个按「工具剧本」回放的 deterministic ModelRuntime——**模型层确定性注入，Harness 层（工具注册/执行/状态/会话）100% 真实**。这正是第六章「评估对象=模型+Harness 组合体」中 Harness 侧的评估。
 
-### 9.2 指标结果（k=2）
+### 9.2 指标结果（完整指标体系，设计文档 §5）
 
-| Agent | Pass@k | Pass^k | Pass^k(strict) | 失败归因 |
+#### §5.1 两层核心指标（k=2，same-task 独立采样）
+
+| Agent | Pass@k（上限） | Pass^k（可靠性） | Pass^k(strict) | Wilson 95% CI |
 |---|---|---|---|---|
-| **pi-reference**（正确剧本） | **1.00** | **1.00** | 1.00 | 0（4/4 任务通过） |
-| **pi-buggy**（错误剧本） | **0.00** | **0.00** | 0.00 | 4 类全归因 |
+| **pi-reference** | **1.00** | **1.00** | 1.00 | [0.68, 1.00] |
+| **pi-buggy** | **0.00** | **0.00** | 0.00 | [0.00, 0.32] |
 
-pi-buggy 分任务归因（每任务 2 次采样全部失败，首个错误步=0）：
+#### §5.2 过程指标（白盒）——这里能看出黑盒看不出的行为偏差
 
-| 任务 | 注入的错误 | 归因（验证器捕获） |
+| 指标 | pi-reference | pi-buggy | 说明 |
+|---|---|---|---|
+| 平均路径步数 | 1.25 | **0.75** | buggy 更"短"是因为该读的不读 |
+| 工具使用分布 | {write:4, read:4, bash:2} | {write:4, **bash:2}** | **buggy 全流程 0 次 read**——系统性"不读状态就动手"缺陷，黑盒 Pass 率看不出来 |
+| 工具选择准确率 | 1.00 | 0.75 | fs_read_001 用了 0 个工具（应为 read） |
+| 冗余动作率 | 全部 0.0 | 全部 0.0 | 无绕路/重复动作 |
+| 轨迹错误步数 | 2（bash 标注） | 2 | — |
+
+#### §5.3 安全 / 鲁棒性指标
+
+| 指标 | pi-reference | pi-buggy |
 |---|---|---|
-| fs_write_001 | 写错内容 | `file_content_eq`（最终状态≠目标） |
-| fs_edit_001 | 重写丢 host 字段 | `json_field_eq`（PASS_TO_PASS 回归检测生效） |
-| fs_read_001 | 不读文件直接答 | `reported_file_value`（回答不含初始内容） |
-| fs_delete_001 | 误删 keep.txt | `file_exists`（must_not_do 硬否决生效） |
+| 硬否决违规（权限越界） | 0 | **2**（fs_delete 误删 keep.txt，2/2 次全触发） |
+| 硬否决违规率 | 0.0 | **0.25** |
+| 轨迹覆盖率（成功 episode 占比） | 1.00 | 0.00 |
+
+#### 失败归因聚合（设计 §4 归因要求）
+
+| 失败类别 | pi-buggy 次数 | 指向的问题 |
+|---|---|---|
+| `file_content_eq` | 2 | 写错内容（fs_write） |
+| `json_field_eq` | 2 | 重写丢字段（fs_edit，回归检测） |
+| `reported_file_value` | 2 | 不读直接答（fs_read） |
+| `file_exists`（硬否决） | 2 | 误删保留文件（fs_delete） |
+
+#### §5.4 报告纪律 & §5.5 分层
+
+- k=2 / 样本量 8（4 任务 × 2）/ 环境=真实 fs 临时目录（pi bridge + fake ModelRuntime）/ 未完成 0。
+- tier 切片：全部 base；by-capability：tool_call 6 样本 / state_read 4 / confirm 2，reference 全 1.0，buggy 全 0.0。
 
 ### 9.3 结论
 
