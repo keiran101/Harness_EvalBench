@@ -3,6 +3,7 @@
 > 评估对象：`D:\MyFiles\agent-harness\pi-main`（Pi Agent Harness，MIT）
 > 评估目的：判断这个真实 agent harness 的**架构质量、评估体系完备度、可测性**，并给出「接入 `agent_eval` 框架完成评估」的可行路径与实测结果。
 > 评估视角：第六章「Agent 的评估」方法论（评估对象=模型+Harness 组合体；轨迹是评估单元；验证最终状态而非文本；失败可归因）。
+> 更新：已按评估设计实际接入 pi 并跑出正式指标（§9），见 `agent_eval/eval_pi_output.json`。
 
 ---
 
@@ -14,7 +15,7 @@
 | 自带评估体系 | 有完整 harness（vitest-evals）：轨迹/usage/artifacts 齐全，但断言是 **QA 式文本** | ★★★☆☆ |
 | 可测性 | `streamFn`/`getApiKey`/`beforeToolCall`/`afterToolCall` 全可注入 → **无 key 可测** | ★★★★★ |
 | 与 agent_eval 对照 | harness 抽象同构；缺状态验证/双检/防泄漏/Pass@k 分层/归因 | 互补性强 |
-| 实测可跑性 | 依赖未装（进行中）；无 bun、无 LLM key；evals 单元测试待跑 | 待定 |
+| 实测可跑性 | **已接入并跑出指标**（coding 数据集，k=2）：reference 1.0/1.0，buggy 0.0/0.0 全归因 | ✅ 已验证 |
 
 **一句话**：pi 的「Harness 工程」很强（可注入、可观测、会话可回放），但「评估体系」还停留在 QA 式文本断言阶段——把它接入我们的框架，正好把第六章的「Task 范式」补上。
 
@@ -138,3 +139,42 @@ extensions.eval 稍好：`output()` 返回结构化布尔（systemPromptHasGuide
 1. **短中期（无 key）**：evals 单元测试已验证 harness 质量（16/17）；修复 `artifacts.test.ts` 的路径分隔符断言（`path.sep` 或正则兼容 `[/\\]`）即全绿；再写 streamFn 注入脚本驱动隔离 session，验证「无 key 可测」结论。
 2. **中期（有 key）**：按 §6 接 `domain=coding` 数据集，跑真实 pi 在编码任务上的 Pass@k/Pass^k（k≥4，seed 采样），产出与 ReferenceAgent 同口径的报告。
 3. **对 pi 项目的建议**：把自带 evals 从「文本断言」升级为「状态验证 + 双检」——它的 harness 已具备全部原料（轨迹事件/结构化 output），只差在用例层定义「最终状态断言 + 防泄漏 + Pass@k 分层」，可与我们的 base 数据集机制互通。
+
+---
+
+## 9. 按评估设计的正式评估结果（2026-08-23 实测）
+
+### 9.1 怎么做的（完整链路，对应顶层设计方案）
+
+| 层 | 实现 | 说明 |
+|---|---|---|
+| 数据集 | `agent_eval/datasets/data/coding/fs_tasks.json`（4 任务，JSON 外置） | fs 域 base 档：write / edit(多字段) / read / delete(不可逆) |
+| 环境 | `environments/fs_env.py`（FsEnv） | 真实临时目录：setup 写初始文件树，get_state 扫描最终文件树 |
+| 被测对象 | `pi-bridge.ts` + `pi_adapter.py` | **注入 fake ModelRuntime**（deterministic）驱动 pi 真实 AgentSession；工具（read/write/bash）真实执行 |
+| 验证 | `checks.py` 新增 6 个 fs 检查（file_content_eq/json_field_eq/file_exists/dir_entries_eq…） | FAIL_TO_PASS + PASS_TO_PASS + must_not_do 硬否决 |
+| 指标 | `run_pi_eval.py` → `agent_eval/eval_pi_output.json` | Pass@k / Pass^k / strict / 归因（k=2，seed 采样） |
+
+注入方式（关键）：pi 的 `AgentSession` 把 LLM 调用抽象为 `modelRuntime.streamSimple(...)`；我们向 `createAgentSessionServices({modelRuntime: fake})` 注入一个按「工具剧本」回放的 deterministic ModelRuntime——**模型层确定性注入，Harness 层（工具注册/执行/状态/会话）100% 真实**。这正是第六章「评估对象=模型+Harness 组合体」中 Harness 侧的评估。
+
+### 9.2 指标结果（k=2）
+
+| Agent | Pass@k | Pass^k | Pass^k(strict) | 失败归因 |
+|---|---|---|---|---|
+| **pi-reference**（正确剧本） | **1.00** | **1.00** | 1.00 | 0（4/4 任务通过） |
+| **pi-buggy**（错误剧本） | **0.00** | **0.00** | 0.00 | 4 类全归因 |
+
+pi-buggy 分任务归因（每任务 2 次采样全部失败，首个错误步=0）：
+
+| 任务 | 注入的错误 | 归因（验证器捕获） |
+|---|---|---|
+| fs_write_001 | 写错内容 | `file_content_eq`（最终状态≠目标） |
+| fs_edit_001 | 重写丢 host 字段 | `json_field_eq`（PASS_TO_PASS 回归检测生效） |
+| fs_read_001 | 不读文件直接答 | `reported_file_value`（回答不含初始内容） |
+| fs_delete_001 | 误删 keep.txt | `file_exists`（must_not_do 硬否决生效） |
+
+### 9.3 结论
+
+1. **评估链路端到端成立**：coding 数据集 → 真实 fs 环境 → pi（fake ModelRuntime）→ 状态验证 → 指标报告，全部按评估设计落地，39 个框架测试保持全绿。
+2. **pi 的 Harness 执行层正确性得到验证**：reference 剧本下 4 类工具调用（write/read/bash 含 JSON 编辑）全部正确执行、状态正确——说明 pi 的工具执行/会话层本身没毛病。
+3. **评估体系的价值被验证**：buggy 的 4 类错误全部被双检/硬否决捕获并归因到具体检查——这正是自带 evals（QA 文本断言）做不到的。
+4. **诚实边界**：模型层是确定性注入（无 key），所以这里评估的是「pi Harness + 固定决策」组合，不是 pi 的真实智能水平；有 key 时把 fake ModelRuntime 换成真实 stream 即可跑同一数据集，指标口径不变。

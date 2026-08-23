@@ -1,0 +1,45 @@
+{
+  "dataset": "coding",
+  "version": "coding-0.1",
+  "note": "被测对象 = pi coding-agent Harness（工具执行/状态/会话层）+ 确定性注入决策层（fake ModelRuntime，无 API key）。k=2 独立采样。",
+  "agents": {
+    "pi-reference": {
+      "agent": "pi-reference",
+      "k": 2,
+      "k_scope": "same-task k independent samples",
+      "sample_size": 8,
+      "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+      "overall": {
+        "pass_at_k": 1.0,
+        "pass_k": 1.0,
+        "pass_consecutive_k": 1.0,
+        "first_error_cases": 0
+      },
+      "templates": {
+        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "passed": [true, true], "first_error_steps": [], "categories": []},
+        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "passed": [true, true], "first_error_steps": [], "categories": []},
+        "fs_read_001": {"tier": "base", "capability": ["state_read"], "passed": [true, true], "first_error_steps": [], "categories": []},
+        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "passed": [true, true], "first_error_steps": [], "categories": []}
+      }
+    },
+    "pi-buggy": {
+      "agent": "pi-buggy",
+      "k": 2,
+      "k_scope": "same-task k independent samples",
+      "sample_size": 8,
+      "env": "real filesystem tempdir (pi bridge, fake ModelRuntime)",
+      "overall": {
+        "pass_at_k": 0.0,
+        "pass_k": 0.0,
+        "pass_consecutive_k": 0.0,
+        "first_error_cases": 4
+      },
+      "templates": {
+        "fs_write_001": {"tier": "base", "capability": ["tool_call"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["file_content_eq", "file_content_eq"]},
+        "fs_edit_001": {"tier": "base", "capability": ["tool_call", "state_read"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["json_field_eq", "json_field_eq"]},
+        "fs_read_001": {"tier": "base", "capability": ["state_read"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["reported_file_value", "reported_file_value"]},
+        "fs_delete_001": {"tier": "base", "capability": ["tool_call", "confirm"], "passed": [false, false], "first_error_steps": [0, 0], "categories": ["file_exists", "file_exists"]}
+      }
+    }
+  }
+}

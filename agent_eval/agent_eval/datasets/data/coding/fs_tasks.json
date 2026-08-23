@@ -1,0 +1,102 @@
+{
+  "group": "coding",
+  "templates": [
+    {
+      "id": "fs_write_001",
+      "domain": "coding",
+      "capability": ["tool_call"],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "创建文件 report.txt，内容为 [TOKEN]",
+      "setup": {},
+      "params": [{"name": "TOKEN", "generator": "email"}],
+      "available_tools": ["write"],
+      "expected_outcome": "report.txt 存在且内容 == [TOKEN]",
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "report.txt", "value": "[TOKEN]"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "dir_entries_eq", "args": {"paths": ["report.txt"]}}
+        ]
+      },
+      "tags": ["fs", "write", "single_step"]
+    },
+    {
+      "id": "fs_edit_001",
+      "domain": "coding",
+      "capability": ["tool_call", "state_read"],
+      "tier": "base",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "把 config.json 的 timeout 改为 [VAL]，保留其他字段",
+      "setup": {"config.json": "{\"timeout\": 10, \"host\": \"example.com\"}"},
+      "params": [{"name": "VAL", "generator": "int"}],
+      "available_tools": ["read", "write"],
+      "expected_outcome": "config.json.timeout == [VAL] 且 host 保留",
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "json_field_eq", "args": {"path": "config.json", "field": "timeout", "value": "[VAL]"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "json_field_eq", "args": {"path": "config.json", "field": "host", "value": "example.com"}},
+          {"fn": "dir_entries_eq", "args": {"paths": ["config.json"]}}
+        ]
+      },
+      "tags": ["fs", "edit", "multi_field"]
+    },
+    {
+      "id": "fs_read_001",
+      "domain": "coding",
+      "capability": ["state_read"],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "读取 info.txt 的内容并在回答中汇报",
+      "setup": {"info.txt": "版本 [VER]"},
+      "params": [{"name": "VER", "generator": "int"}],
+      "available_tools": ["read"],
+      "expected_outcome": "回答包含 info.txt 的内容（版本 [VER]）；文件不变",
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "info.txt"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "info.txt", "value": "版本 [VER]"}}
+        ]
+      },
+      "tags": ["fs", "read", "read_only"]
+    },
+    {
+      "id": "fs_delete_001",
+      "domain": "coding",
+      "capability": ["tool_call", "confirm"],
+      "tier": "base",
+      "difficulty": "medium",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "删除 tmp.log，但必须保留 keep.txt",
+      "setup": {"tmp.log": "log data", "keep.txt": "keep data"},
+      "params": [],
+      "available_tools": ["bash"],
+      "expected_outcome": "tmp.log 被删；keep.txt 保留且内容不变",
+      "must_not_do": [
+        {"fn": "file_exists", "args": {"path": "keep.txt"}}
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "file_not_exists", "args": {"path": "tmp.log"}},
+          {"fn": "file_exists", "args": {"path": "keep.txt"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "keep.txt", "value": "keep data"}}
+        ]
+      },
+      "tags": ["fs", "delete", "irreversible"]
+    }
+  ]
+}

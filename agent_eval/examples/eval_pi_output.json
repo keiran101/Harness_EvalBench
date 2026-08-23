@@ -1,0 +1,178 @@
+{
+  "dataset": "coding",
+  "version": "coding-0.1",
+  "agents": {
+    "reference": {
+      "k": 2,
+      "k_scope": "same-task k independent samples",
+      "sample_size": 8,
+      "env": "tool-calling env, deterministic verifier",
+      "overall": {
+        "pass_at_k": 1.0,
+        "pass_k": 1.0,
+        "pass_consecutive_k": 1.0,
+        "first_error_cases": 0
+      },
+      "by_capability": {
+        "tool_call": {
+          "n": 6,
+          "pass_k": 1.0
+        },
+        "state_read": {
+          "n": 4,
+          "pass_k": 1.0
+        },
+        "confirm": {
+          "n": 2,
+          "pass_k": 1.0
+        }
+      },
+      "unfinished": [],
+      "agent": "pi-reference",
+      "templates": {
+        "fs_write_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call"
+          ],
+          "passed": [
+            true,
+            true
+          ],
+          "first_error_steps": [],
+          "categories": []
+        },
+        "fs_edit_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call",
+            "state_read"
+          ],
+          "passed": [
+            true,
+            true
+          ],
+          "first_error_steps": [],
+          "categories": []
+        },
+        "fs_read_001": {
+          "tier": "base",
+          "capability": [
+            "state_read"
+          ],
+          "passed": [
+            true,
+            true
+          ],
+          "first_error_steps": [],
+          "categories": []
+        },
+        "fs_delete_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call",
+            "confirm"
+          ],
+          "passed": [
+            true,
+            true
+          ],
+          "first_error_steps": [],
+          "categories": []
+        }
+      }
+    },
+    "buggy": {
+      "k": 2,
+      "k_scope": "same-task k independent samples",
+      "sample_size": 8,
+      "env": "tool-calling env, deterministic verifier",
+      "overall": {
+        "pass_at_k": 0.25,
+        "pass_k": 0.25,
+        "pass_consecutive_k": 0.25,
+        "first_error_cases": 2
+      },
+      "by_capability": {
+        "tool_call": {
+          "n": 6,
+          "pass_k": 0.0
+        },
+        "state_read": {
+          "n": 4,
+          "pass_k": 0.5
+        },
+        "confirm": {
+          "n": 2,
+          "pass_k": 0.0
+        }
+      },
+      "unfinished": [],
+      "agent": "pi-buggy",
+      "templates": {
+        "fs_write_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call"
+          ],
+          "passed": [
+            false,
+            false
+          ],
+          "first_error_steps": [],
+          "categories": [
+            "file_content_eq",
+            "file_content_eq"
+          ]
+        },
+        "fs_edit_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call",
+            "state_read"
+          ],
+          "passed": [
+            false,
+            false
+          ],
+          "first_error_steps": [],
+          "categories": [
+            "json_field_eq",
+            "json_field_eq"
+          ]
+        },
+        "fs_read_001": {
+          "tier": "base",
+          "capability": [
+            "state_read"
+          ],
+          "passed": [
+            true,
+            true
+          ],
+          "first_error_steps": [],
+          "categories": []
+        },
+        "fs_delete_001": {
+          "tier": "base",
+          "capability": [
+            "tool_call",
+            "confirm"
+          ],
+          "passed": [
+            false,
+            false
+          ],
+          "first_error_steps": [
+            0,
+            0
+          ],
+          "categories": [
+            "file_exists",
+            "file_exists"
+          ]
+        }
+      }
+    }
+  }
+}
