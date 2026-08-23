@@ -1,0 +1,5 @@
+{
+  "name": "agent-eval-bridge",
+  "private": true,
+  "type": "module"
+}

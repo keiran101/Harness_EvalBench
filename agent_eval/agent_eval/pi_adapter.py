@@ -17,6 +17,7 @@ Strategy:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from typing import Dict, List, Optional
 
@@ -24,8 +25,8 @@ from .core import Step, Trajectory
 from .datasets.templates import TaskInstance
 from .environments.fs_env import FsEnv
 
-BRIDGE_PATH = r"D:/MyFiles/agent-harness/pi-main/pi-bridge.ts"
-BRIDGE_CWD = r"D:/MyFiles/agent-harness/pi-main"
+BRIDGE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bridge", "pi_bridge.ts")
+PI_ROOT = r"D:/MyFiles/agent-harness/pi-main"
 NODE = "node"
 NODE_FLAGS = ["--experimental-strip-types"]
 
@@ -88,22 +89,23 @@ def _fill_args(args, params: Dict[str, str]):
 
 class PiAgentAdapter:
     def __init__(self, strategy: str = "reference", name: Optional[str] = None,
-                 bridge_path: str = BRIDGE_PATH, bridge_cwd: str = BRIDGE_CWD):
+                 bridge_path: str = BRIDGE_PATH, pi_root: str = PI_ROOT):
         if strategy not in ("reference", "buggy"):
             raise ValueError(f"unknown strategy: {strategy}")
         self.strategy = strategy
         self.name = name or f"pi-{strategy}"
         self.bridge_path = bridge_path
-        self.bridge_cwd = bridge_cwd
+        self.pi_root = pi_root
 
     def _call_bridge(self, cwd: str, instruction: str, plan: List[dict],
                      answer: str) -> dict:
         payload = json.dumps({"cwd": cwd, "instruction": instruction,
                               "plan": plan, "answer": answer})
+        env = {**os.environ, "PI_ROOT": self.pi_root}
         proc = subprocess.run(
             [NODE, *NODE_FLAGS, self.bridge_path],
             input=payload, capture_output=True, text=True,
-            cwd=self.bridge_cwd, timeout=180, encoding="utf-8",
+            env=env, timeout=180, encoding="utf-8",
         )
         if proc.returncode != 0:
             raise RuntimeError(f"bridge failed rc={proc.returncode}: {proc.stderr[:500]}")

@@ -62,7 +62,23 @@ result = reg.verify(inst, final_state, trajectory)      # 双检 + 硬否决
 2. **接 LLMJudge**：`pip install openai` + key，`Evaluator(..., judge=LLMJudge(api_key=...))`。已内置 rubric 分维 + 加权结构，按 `judge/judge.py` 注释补真实调用。
 3. **接 CI / 回归**：失败报告喂给 `RegressionStore`，`prefix_boundary_set(n)` 生成边界集，随 Agent 一起演化（闭环）。
 
+### 接入外部 agent（如 pi coding-agent）：桥在框架侧，被测对象只读
+
+设计原则：**评估不污染被测对象**（第六章隔离精神）——所有适配代码都在 `agent_eval/bridge/` 内，被测项目目录零写入。
+
+```
+agent_eval/bridge/pi_bridge.ts   # TS 桥：注入 fake ModelRuntime 驱动 pi 真实 AgentSession
+agent_eval/agent_eval/pi_adapter.py  # Python 适配器：subprocess 调桥，PI_ROOT 定位被测源码
+agent_eval/examples/run_pi_eval.py   # 评估入口：coding 数据集 → FsEnv → 指标体系 → JSON
+```
+
+- 桥通过 `PI_ROOT` 环境变量（默认 `D:/MyFiles/agent-harness/pi-main`）动态 import 被测对象源码，**不写入、不修改被测项目**。
+- 被测项目只需一次性环境准备（`npm install` + build 其 dist），属运行依赖而非代码修改。
+- 模型层为确定性注入（无 key），评估对象 = 被测 Harness（工具执行/状态/会话层）+ 固定决策层；有 key 时把 fake ModelRuntime 换成真实 stream 即可，指标口径不变。
+- 运行：`python examples/run_pi_eval.py` → `agent_eval/eval_pi_output.json`。
+
 ## 依赖
 
 - 运行时：**纯标准库**（零依赖）。
 - 开发：`pytest>=8`（见 `requirements.txt`）。
+- 可选（接入外部 agent）：`node>=22`（`--experimental-strip-types` 跑桥，无需额外 npm 包）。
