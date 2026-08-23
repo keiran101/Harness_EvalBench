@@ -43,17 +43,6 @@ def first_error_step(traj: Trajectory) -> Optional[int]:
 
 
 @dataclass
-class EvalCase:
-    """A concrete evaluation instance handed to an environment + agent."""
-    id: str
-    tier: str                 # base | Middle | hard
-    capability: str
-    instruction: str
-    setup: dict               # initial environment state (deterministic, resettable)
-    expectation: str
-
-
-@dataclass
 class VerificationResult:
     """Outcome of running the FAIL_TO_PASS / PASS_TO_PASS verifier on a final state."""
     passed: bool

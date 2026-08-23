@@ -38,3 +38,22 @@ def fresh_after(cutoff: str) -> str:
 def mark_isolation(template: TaskTemplate) -> TaskTemplate:
     template.leak_guard["isolation"] = True
     return template
+
+
+def wire_leak_guard(template: TaskTemplate, cutoff: str = "2026-07-01",
+                    inject: bool = True) -> TaskTemplate:
+    """Populate a template's leak_guard with the full red-line set (spec §6):
+
+    - canary GUID, also embedded into the instruction as a tripwire: if a model ever
+      echoes it, that proves contamination (spec: canary GUID);
+    - freshness: prefer instances dated after the model's training cutoff;
+    - isolation marker: the template (construct) is reusable, instances must not enter
+      training data.
+    """
+    canary = make_canary()
+    template.leak_guard["canary"] = canary
+    template.leak_guard["fresh_after"] = fresh_after(cutoff)
+    template.leak_guard["isolation"] = True
+    if inject:
+        template.instruction = inject_canary(template.instruction, canary)
+    return template

@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agent_eval.core import (
-    Step, Trajectory, EvalCase, VerificationResult, EvalReport, first_error_step
+    Step, Trajectory, VerificationResult, EvalReport, first_error_step
 )
 
 

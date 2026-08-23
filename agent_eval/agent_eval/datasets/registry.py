@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+from .anti_leak import wire_leak_guard
 from .templates import TaskInstance, TaskTemplate, instantiate
 from .verifier import verify as _verify
 
@@ -19,8 +20,12 @@ class DatasetRegistry:
 
     @classmethod
     def with_base(cls, version: str = "0.1.0") -> "DatasetRegistry":
+        """Build the base-tier registry. Every template is leak-wired (canary GUID
+        embedded in instruction + freshness + isolation marker) before registration —
+        the red line: leak_guard must never be an empty shell."""
         reg = cls(version)
         for t in _base_templates():
+            wire_leak_guard(t)
             reg.register(t)
         return reg
 

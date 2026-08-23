@@ -37,6 +37,7 @@ class TaskTemplate:
     verifier: Dict[str, List]  # {'fail_to_pass': [(name, CheckFn)], 'pass_to_pass': [...]}
     leak_guard: Dict[str, Any] = field(default_factory=dict)
     tags: List[str] = field(default_factory=list)
+    expectation: str = ""        # human-readable success criteria (optional metadata)
 
 
 @dataclass
@@ -51,6 +52,7 @@ class TaskInstance:
     verifier: Dict[str, List]
     leak_guard: Dict[str, Any]
     tags: List[str]
+    expectation: str = ""        # optional success criteria (e.g. regression reason)
 
 
 _GENERATORS = {
@@ -97,4 +99,5 @@ def instantiate(template: TaskTemplate, seed: int) -> TaskInstance:
         verifier=template.verifier,
         leak_guard=template.leak_guard,
         tags=template.tags,
+        expectation=template.expectation,
     )
