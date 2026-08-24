@@ -107,3 +107,17 @@ def test_mock_retrieval_coverage_one():
     assert retrieval_coverage(traj, inst)["value"] == 1.0
     vr = reg.verify(inst, env.get_state(), traj)
     assert vr.passed is True
+
+
+from agent_eval.evaluator import Evaluator
+
+def test_evaluator_attaches_process_metrics():
+    reg = DatasetRegistry.from_dirs(_retrieval_data_dir())
+    ev = Evaluator(reg, UnifiedMockAgent(), k=2,
+                   env_factory=make_env_factory("disk"))
+    summary = ev.evaluate()
+    rep = summary["templates"]["base_retrieval_001"]
+    # robustness present at template level
+    assert "robustness" in rep and rep["robustness"]["value"] == 1.0
+    # process_metrics aggregated at summary level
+    assert summary["process_metrics"]["retrieval_coverage"]["mean"] == 1.0

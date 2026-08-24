@@ -7,6 +7,7 @@ score, and aggregates a report with k-scope / sample-size / env / unfinished dis
 
 from __future__ import annotations
 
+from time import perf_counter
 from typing import Callable, Dict, List, Optional
 
 from .core import EvalReport, first_error_step
@@ -19,6 +20,11 @@ from .metrics.metrics import (
     pass_k,
     summarize,
 )
+from .metrics.process import (
+    action_legality, path_efficiency, retrieval_coverage,
+    cost_latency, safety_compliance,
+)
+from .metrics.process import robustness, aggregate_averages
 
 
 def make_env_factory(default_backend: str = "memory") -> Callable:
@@ -53,21 +59,29 @@ class Evaluator:
         for i in range(self.k):
             inst = self.registry.instantiate(tid, seed=self.seed_base + i)
             env = self.env_factory(inst)
+            t0 = perf_counter()
             traj = self.agent.run(inst, env)
+            traj.latency_ms = (perf_counter() - t0) * 1000.0
             final_state = env.get_state()
             vr = self.registry.verify(inst, final_state, traj)
             judge_score = self.judge.score(inst, traj, final_state, vr)
-            # Failure attribution only for FAILED trajectories (a successful retry's
-            # transient tool error is not an agent error).
             fe = first_error_step(traj) if not vr.passed else None
+            metrics = {
+                "judge": judge_score.overall,
+                "failure_category": judge_score.failure_category,
+                "action_legality": action_legality(traj, inst, vr),
+                "path_efficiency": path_efficiency(traj, inst),
+                "retrieval_coverage": retrieval_coverage(traj, inst),
+                "cost_latency": cost_latency(traj),
+                "safety_compliance": safety_compliance(traj, inst, vr),
+            }
             reports.append(EvalReport(
                 case_id=inst.id,
                 tier=inst.tier,
                 capability=inst.capability,
                 passed=vr.passed,
                 first_error_step=fe,
-                metrics={"judge": judge_score.overall,
-                         "failure_category": judge_score.failure_category},
+                metrics=metrics,
             ))
             env.cleanup()
         return reports
@@ -91,10 +105,14 @@ class Evaluator:
                 "pass_consecutive_k": pass_consecutive_k(successes, self.k),
                 "first_error_steps": [r.first_error_step for r in reps
                                       if r.first_error_step is not None],
+                "robustness": robustness(successes, self.k, t.capability),
             }
             all_reports.extend(reps)
 
         summary = summarize(all_reports, self.k)
         summary["agent"] = getattr(self.agent, "name", "unknown")
         summary["templates"] = per_template
+        summary["process_metrics"] = aggregate_averages(all_reports)
+        summary["robustness"] = {tid: per_template[tid]["robustness"]
+                                 for tid in per_template}
         return summary
