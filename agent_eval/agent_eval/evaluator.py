@@ -7,11 +7,11 @@ score, and aggregates a report with k-scope / sample-size / env / unfinished dis
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from .core import EvalReport, first_error_step
 from .datasets.registry import DatasetRegistry
-from .environments.tool_env import ToolCallingEnv
+from .environments.env import Env
 from .judge.judge import DummyJudge, Judge
 from .metrics.metrics import (
     pass_at_k,
@@ -21,21 +21,38 @@ from .metrics.metrics import (
 )
 
 
+def make_env_factory(default_backend: str = "memory") -> Callable:
+    """Default env factory: picks a backend per instance via its `env.backend`
+    field (schema; may be empty -> default_backend for backward compatibility).
+
+    Evaluation NEVER splits by domain: every template from the merged registry
+    flows through this single factory, so business + coding + future domains run
+    in one unified Evaluator loop with one report.
+    """
+    def factory(instance):
+        backend = (instance.env or {}).get("backend", default_backend)
+        return Env(instance.setup, backend=backend)
+    return factory
+
+
 class Evaluator:
     def __init__(self, registry: DatasetRegistry, agent, k: int = 4,
-                 seed_base: int = 0, judge: Optional[Judge] = None):
+                 seed_base: int = 0, judge: Optional[Judge] = None,
+                 env_factory: Optional[Callable] = None):
         self.registry = registry
         self.agent = agent
         self.k = k
         self.seed_base = seed_base
         self.judge = judge or DummyJudge()
+        # Environment-agnostic: default factory dispatches by instance.env.backend.
+        self.env_factory = env_factory or make_env_factory()
 
     def run_case(self, tid: str) -> List[EvalReport]:
         """Run one template k times; each run is a fresh deterministic episode."""
         reports: List[EvalReport] = []
         for i in range(self.k):
             inst = self.registry.instantiate(tid, seed=self.seed_base + i)
-            env = ToolCallingEnv(inst.setup)
+            env = self.env_factory(inst)
             traj = self.agent.run(inst, env)
             final_state = env.get_state()
             vr = self.registry.verify(inst, final_state, traj)
@@ -52,6 +69,7 @@ class Evaluator:
                 metrics={"judge": judge_score.overall,
                          "failure_category": judge_score.failure_category},
             ))
+            env.cleanup()
         return reports
 
     def evaluate(self, tids: Optional[List[str]] = None,

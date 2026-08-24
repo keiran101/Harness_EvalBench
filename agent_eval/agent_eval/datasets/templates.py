@@ -74,6 +74,18 @@ class TaskTemplate:
     leak_guard: Dict[str, Any] = field(default_factory=dict)
     tags: List[str] = field(default_factory=list)
     expectation: str = ""
+    # ---- unified-env field (2026-08-23) ----
+    # Names the storage backend for this template. May be empty -> defaults to
+    # {"backend": "memory"}. Evaluator reads this to pick Env's backend; it never
+    # splits evaluation by domain. Future domains add a backend value, not a new env.
+    env: Dict[str, Any] = field(default_factory=lambda: {"backend": "memory"})
+    # ---- reference-plan fields (2026-08-23) ----
+    # Data-driven plans for real-agent harnesses (pi bridge). `reference_plan` is
+    # the CORRECT tool-call sequence (args may hold [PARAM] placeholders, filled at
+    # instantiate time); `reference_answer` is the agent's final text for read/report
+    # tasks. May be empty -> the adapter falls back to no-op / empty answer.
+    reference_plan: List[Dict[str, Any]] = field(default_factory=list)
+    reference_answer: str = ""
 
 
 @dataclass
@@ -99,6 +111,18 @@ class TaskInstance:
     leak_guard: Dict[str, Any] = field(default_factory=dict)
     tags: List[str] = field(default_factory=list)
     expectation: str = ""
+    # ---- unified-env field (2026-08-23) ----
+    # Names the storage backend for this template. May be empty -> defaults to
+    # {"backend": "memory"}. Evaluator reads this to pick Env's backend; it never
+    # splits evaluation by domain. Future domains add a backend value, not a new env.
+    env: Dict[str, Any] = field(default_factory=lambda: {"backend": "memory"})
+    # ---- reference-plan fields (2026-08-23) ----
+    # Data-driven plans for real-agent harnesses (pi bridge). `reference_plan` is
+    # the CORRECT tool-call sequence (args may hold [PARAM] placeholders, filled at
+    # instantiate time); `reference_answer` is the agent's final text for read/report
+    # tasks. May be empty -> the adapter falls back to no-op / empty answer.
+    reference_plan: List[Dict[str, Any]] = field(default_factory=list)
+    reference_answer: str = ""
 
 
 _GENERATORS = {
@@ -168,6 +192,10 @@ def _to_instance_fields(template: TaskTemplate, params: Dict[str, str],
         leak_guard=dict(template.leak_guard),
         tags=list(template.tags),
         expectation=_fill(template.expectation, params),
+        env=dict(template.env),
+        reference_plan=[{**c, "args": _fill_check_args(c.get("args", {}), params)}
+                        for c in template.reference_plan],
+        reference_answer=_fill(template.reference_answer, params),
     )
 
 
@@ -204,6 +232,9 @@ def from_dict(d: dict) -> TaskTemplate:
         leak_guard=d.get("leak_guard", {}),
         tags=d.get("tags", []),
         expectation=d.get("expectation", ""),
+        env=d.get("env", {"backend": "memory"}),
+        reference_plan=d.get("reference_plan", []),
+        reference_answer=d.get("reference_answer", ""),
     )
 
 
@@ -230,4 +261,7 @@ def to_dict(t: TaskTemplate) -> dict:
         "leak_guard": t.leak_guard,
         "tags": t.tags,
         "expectation": t.expectation,
+        "env": t.env,
+        "reference_plan": t.reference_plan,
+        "reference_answer": t.reference_answer,
     }

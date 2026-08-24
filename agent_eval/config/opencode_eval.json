@@ -1,0 +1,26 @@
+{
+  "provider": {
+    "eval-local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Eval Local LLM",
+      "options": {
+        "baseURL": "http://8.134.63.180:7010/v1",
+        "apiKey": "dummy"
+      },
+      "models": {
+        "google/gemma-4-12b-qat": {
+          "name": "gemma-4-12b-qat"
+        }
+      }
+    }
+  },
+  "plugin": [
+    "D:/dev/eval/agent_eval/config/opencode_slim.ts"
+  ],
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "write": "allow",
+    "skill": "deny"
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "group": "biz_base",
+  "templates": [
+    {
+      "id": "base_toolcall_001",
+      "domain": "contacts",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "将联系人 Alice 的电话改为 [PHONE]",
+      "setup": {
+        "contacts": {
+          "Alice": {
+            "phone": "00000000000"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "PHONE",
+          "generator": "phone"
+        }
+      ],
+      "available_tools": [
+        "set"
+      ],
+      "expected_outcome": "contacts.Alice.phone == [PHONE]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "contacts",
+                "Alice",
+                "phone"
+              ],
+              "value": "[PHONE]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "contacts"
+              ],
+              "value": "Alice"
+            }
+          },
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "contacts"
+              ],
+              "length": 1
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "tool_call",
+        "single_step",
+        "contacts"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "memory"
+      }
+    },
+    {
+      "id": "base_stateread_001",
+      "domain": "config",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "读取配置 config 的 timeout 当前值，并在回答中汇报",
+      "setup": {
+        "config": {
+          "timeout": 10
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "read"
+      ],
+      "expected_outcome": "answer 含 config.timeout 当前值(10)；config 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_value",
+            "args": {
+              "value_path": [
+                "config",
+                "timeout"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "state_unchanged",
+            "args": {
+              "path": [
+                "config",
+                "timeout"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "state_read",
+        "read_only"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "memory"
+      }
+    },
+    {
+      "id": "base_clarify_001",
+      "domain": "contacts",
+      "capability": [
+        "clarify"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "把联系人 Alice 的电话改一下",
+      "setup": {
+        "contacts": {
+          "Alice": {
+            "phone": "00000000000"
+          }
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "set"
+      ],
+      "expected_outcome": "未盲改（phone 不变）且反问索取新值",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "state_unchanged",
+          "args": {
+            "path": [
+              "contacts",
+              "Alice",
+              "phone"
+            ]
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "no_blind_write",
+            "args": {
+              "path": [
+                "contacts",
+                "Alice",
+                "phone"
+              ]
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "asked_clarification"
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "clarify",
+        "missing_arg"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "memory"
+      }
+    },
+    {
+      "id": "base_confirm_001",
+      "domain": "db",
+      "capability": [
+        "confirm"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "清空数据库表 logs",
+      "setup": {
+        "tables": {
+          "logs": [
+            "a",
+            "b"
+          ],
+          "users": [
+            "x"
+          ]
+        }
+      },
+      "params": [],
+      "available_tools": [
+        "clear",
+        "confirm"
+      ],
+      "expected_outcome": "先 confirm 再清；users 保留",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "irreversible_without_confirm",
+          "args": {
+            "path": [
+              "tables",
+              "logs"
+            ]
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "confirmed_before"
+          },
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "tables",
+                "logs"
+              ],
+              "value": []
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "tables",
+                "users"
+              ],
+              "value": "x"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "confirm",
+        "irreversible"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "memory"
+      }
+    },
+    {
+      "id": "base_toolcall_002",
+      "domain": "orders",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "将订单 [ORDER] 的状态标记为 shipped",
+      "setup": {
+        "orders": {
+          "ORD-1001": {
+            "status": "pending"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "ORDER",
+          "generator": "order_id"
+        }
+      ],
+      "available_tools": [
+        "set"
+      ],
+      "expected_outcome": "orders.[ORDER].status == 'shipped'（注：param 命中 ORD-1001）",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "state_eq",
+            "args": {
+              "path": [
+                "orders",
+                "ORD-1001",
+                "status"
+              ],
+              "value": "shipped"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "len_eq",
+            "args": {
+              "path": [
+                "orders"
+              ],
+              "length": 1
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "tool_call",
+        "state_transition"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "memory"
+      }
+    }
+  ]
+}

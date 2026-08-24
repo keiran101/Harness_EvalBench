@@ -1,8 +1,8 @@
 {
-  "group": "coding",
+  "group": "coding_base",
   "templates": [
     {
-      "id": "fs_write_001",
+      "id": "base_fs_write_001",
       "domain": "coding",
       "capability": [
         "tool_call"
@@ -23,6 +23,8 @@
         "write"
       ],
       "expected_outcome": "report.txt 存在且内容 == [TOKEN]",
+      "must_do": [],
+      "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
           {
@@ -44,11 +46,16 @@
           }
         ]
       },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
       "tags": [
         "fs",
         "write",
         "single_step"
       ],
+      "expectation": "",
       "env": {
         "backend": "disk"
       },
@@ -64,15 +71,83 @@
       "reference_answer": "done"
     },
     {
-      "id": "fs_edit_001",
+      "id": "base_fs_read_001",
+      "domain": "coding",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "读取 info.txt 的内容并在回答中汇报",
+      "setup": {
+        "info.txt": "版本 [VER]"
+      },
+      "params": [
+        {
+          "name": "VER",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "read"
+      ],
+      "expected_outcome": "回答包含 info.txt 内容（版本 [VER]）；文件不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_file_value",
+            "args": {
+              "path": "info.txt"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "info.txt",
+              "value": "版本 [VER]"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "read",
+        "read_only"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "info.txt"
+          }
+        }
+      ],
+      "reference_answer": "版本 [VER]"
+    },
+    {
+      "id": "base_fs_edit_001",
       "domain": "coding",
       "capability": [
         "tool_call",
         "state_read"
       ],
       "tier": "base",
-      "difficulty": "medium",
-      "steps": 2,
+      "difficulty": "easy",
+      "steps": 1,
       "tools": 2,
       "instruction": "把 config.json 的 timeout 改为 [VAL]，保留其他字段",
       "setup": {
@@ -89,6 +164,8 @@
         "write"
       ],
       "expected_outcome": "config.json.timeout == [VAL] 且 host 保留",
+      "must_do": [],
+      "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
           {
@@ -119,11 +196,16 @@
           }
         ]
       },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
       "tags": [
         "fs",
         "edit",
         "multi_field"
       ],
+      "expectation": "",
       "env": {
         "backend": "disk"
       },
@@ -145,75 +227,14 @@
       "reference_answer": "done"
     },
     {
-      "id": "fs_read_001",
-      "domain": "coding",
-      "capability": [
-        "state_read"
-      ],
-      "tier": "base",
-      "difficulty": "easy",
-      "steps": 1,
-      "tools": 1,
-      "instruction": "读取 info.txt 的内容并在回答中汇报",
-      "setup": {
-        "info.txt": "版本 [VER]"
-      },
-      "params": [
-        {
-          "name": "VER",
-          "generator": "int"
-        }
-      ],
-      "available_tools": [
-        "read"
-      ],
-      "expected_outcome": "回答包含 info.txt 的内容（版本 [VER]）；文件不变",
-      "verifier": {
-        "fail_to_pass": [
-          {
-            "fn": "reported_file_value",
-            "args": {
-              "path": "info.txt"
-            }
-          }
-        ],
-        "pass_to_pass": [
-          {
-            "fn": "file_content_eq",
-            "args": {
-              "path": "info.txt",
-              "value": "版本 [VER]"
-            }
-          }
-        ]
-      },
-      "tags": [
-        "fs",
-        "read",
-        "read_only"
-      ],
-      "env": {
-        "backend": "disk"
-      },
-      "reference_plan": [
-        {
-          "tool": "read",
-          "args": {
-            "path": "info.txt"
-          }
-        }
-      ],
-      "reference_answer": "版本 [VER]"
-    },
-    {
-      "id": "fs_delete_001",
+      "id": "base_fs_delete_001",
       "domain": "coding",
       "capability": [
         "tool_call",
         "confirm"
       ],
       "tier": "base",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "steps": 1,
       "tools": 1,
       "instruction": "删除 tmp.log，但必须保留 keep.txt",
@@ -226,6 +247,7 @@
         "bash"
       ],
       "expected_outcome": "tmp.log 被删；keep.txt 保留且内容不变",
+      "must_do": [],
       "must_not_do": [
         {
           "fn": "file_exists",
@@ -259,11 +281,16 @@
           }
         ]
       },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
       "tags": [
         "fs",
         "delete",
         "irreversible"
       ],
+      "expectation": "",
       "env": {
         "backend": "disk"
       },
@@ -272,6 +299,75 @@
           "tool": "bash",
           "args": {
             "command": "rm tmp.log"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "base_fs_write_002",
+      "domain": "coding",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 1,
+      "tools": 1,
+      "instruction": "在 src/ 目录下创建 main.py，内容为 [TOKEN]",
+      "setup": {},
+      "params": [
+        {
+          "name": "TOKEN",
+          "generator": "email"
+        }
+      ],
+      "available_tools": [
+        "write"
+      ],
+      "expected_outcome": "src/main.py 存在且内容 == [TOKEN]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "src/main.py",
+              "value": "[TOKEN]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "src/main.py"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "write",
+        "nested_path"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "write",
+          "args": {
+            "path": "src/main.py",
+            "content": "[TOKEN]"
           }
         }
       ],

@@ -67,15 +67,35 @@ result = reg.verify(inst, final_state, trajectory)      # 双检 + 硬否决
 设计原则：**评估不污染被测对象**（第六章隔离精神）——所有适配代码都在 `agent_eval/bridge/` 内，被测项目目录零写入。
 
 ```
-agent_eval/bridge/pi_bridge.ts   # TS 桥：注入 fake ModelRuntime 驱动 pi 真实 AgentSession
+agent_eval/bridge/pi_bridge.ts   # TS 桥：驱动 pi 真实 AgentSession（plan 注入 / llm 真实模型双模式）
 agent_eval/agent_eval/pi_adapter.py  # Python 适配器：subprocess 调桥，PI_ROOT 定位被测源码
-agent_eval/examples/run_pi_eval.py   # 评估入口：coding 数据集 → FsEnv → 指标体系 → JSON
 ```
 
 - 桥通过 `PI_ROOT` 环境变量（默认 `D:/MyFiles/agent-harness/pi-main`）动态 import 被测对象源码，**不写入、不修改被测项目**。
 - 被测项目只需一次性环境准备（`npm install` + build 其 dist），属运行依赖而非代码修改。
-- 模型层为确定性注入（无 key），评估对象 = 被测 Harness（工具执行/状态/会话层）+ 固定决策层；有 key 时把 fake ModelRuntime 换成真实 stream 即可，指标口径不变。
-- 运行：`python examples/run_pi_eval.py` → `agent_eval/eval_pi_output.json`。
+- **唯一评估入口（真实 LLM 模式）**：`python -m agent_eval --agent pi --mode llm --datasets coding --k 2` → `agent_eval/eval_pi_coding_llm.json`（`--output` 可覆盖）。
+  - `--mode llm`：pi Harness（真实工具注册/会话/状态）× 真实模型决策（`LLM_EVAL_BASE_URL`/`LLM_EVAL_MODEL`）——正式评估对象。
+  - `--mode plan`：确定性 reference_plan 注入（无 key 自检基线，非正式评估）；`--strategy reference|buggy` 仅 plan 模式生效。
+- **评估前无需冒烟/基线先行**，直接 `--mode llm`；LLM 串行调用（本地部署性能有限）。
+
+## 评估口径区分（三种被测对象，数字不可混比）
+
+同一个 `Evaluator` + 同一套 verifier/metrics，被测对象可插拔；**但每次运行的范围/判定权威不同，跨运行比数字前必须看 `_meta`**。所有输出文件统一携带 `_meta`（agent_type / model / judge / dataset_scope / templates_run / k / sample_size）。
+
+| agent_type | 决策来源 | 数据集范围（自动过滤） | judge | 数字含义 |
+|---|---|---|---|---|
+| `mock`（`UnifiedMockAgent`） | 硬编码完美执行者 | 全池（biz+coding 所有 backend） | dummy（=verifier 映射 0/1） | 框架自检基线：验证器/数据/流程无 bug 时的上限 |
+| `llm`（`LLMToolAgent`） | **真实 LLM 推理**（tool-calling） | **仅 memory backend**（工具面 = 内存 6 工具） | dummy 或 llm-real | 该模型×该 harness 在业务域任务上的真实能力 |
+| `pi`（`PiAgentAdapter`，mode=plan） | 确定性 reference_plan 注入 | **仅 disk backend**（coding 域） | dummy | pi Harness 层（工具/会话/状态）在固定决策层下的表现 |
+| `pi`（`PiAgentAdapter`，mode=llm） | **真实 LLM 推理**（pi 工具面 + 真实模型） | **仅 disk backend**（coding 域） | dummy | **pi Harness × 真实模型** 组合体在编码任务上的真实能力 |
+
+三条硬规则：
+1. **跨 agent_type 的 Pass@k/Pass^k 不可直接比较**（数据集范围、决策来源都不同）；同 agent_type 不同 `dataset_scope` / `k` / `mode` 也不可比。
+2. 主判据永远是**确定性环境状态验证**（二元），`judge` 分数是附加质量维度，0/1（dummy）与 0~1（llm-real）尺度不同。
+3. **模板 id 跨目录可能同名异义**：`datasets/data/base/` 与 `datasets/data/biz/` 均含 `base_clarify_001` 等 id 但内容不同；`from_dirs` 同池内重复 id 会报错，跨池同名仍需以 `dataset_scope` 区分。
+4. **工具面不限定（默认满血评估）**：工具是 harness 的一部分，verifier 只查最终环境状态 + 过程硬约束（confirm/clarify 等），**不校验轨迹调用的工具是否属于任务声明的 `available_tools`**——`available_tools` 是声明性字段（描述任务预期工具面），不参与判定。因此被测 agent 用其完整工具面（含数据集未声明、但 harness 自带的工具）完成任务是**允许且被计入其真实能力**的；横向对比时，工具面差异属于被测 harness 的能力差异，如实反映在分数里。`available_tools` 字段保留（用于数据集可读性/后续可选"限定工具"模式），但当前**不实现**限定工具的分支。
+
+CLI：`python -m agent_eval --agent mock|llm|pi`；pi 真实模型：`--agent pi --mode llm`（走 `LLM_EVAL_BASE_URL` / `LLM_EVAL_MODEL`，plan 模式只作对照基线）。llm 示例：`--agent llm --datasets base --k 2`。
 
 ## 依赖
 

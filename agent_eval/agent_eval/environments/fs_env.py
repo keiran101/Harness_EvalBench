@@ -11,11 +11,15 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import tempfile
 from typing import Any, Dict
 
+from .base import BaseEnv
+from .tool_env import ToolError
 
-class FsEnv:
+
+class FsEnv(BaseEnv):
     def __init__(self, setup: Dict[str, Any]):
         self._tmp = tempfile.mkdtemp(prefix="pi-eval-")
         self.cwd = self._tmp
@@ -40,6 +44,33 @@ class FsEnv:
                 with open(full, "r", encoding="utf-8", errors="replace") as f:
                     out[rel] = f.read()
         return out
+
+    def call_tool(self, name: str, **kwargs) -> str:
+        """Framework-internal tool execution (disk backend). The pi bridge drives
+        the env externally; this lets a generic in-process agent also run coding
+        tasks through the same Env interface. bash runs for real in env.cwd."""
+        if name == "write":
+            full = os.path.join(self.cwd, kwargs["path"])
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            with open(full, "w", encoding="utf-8") as f:
+                f.write(kwargs["content"])
+            return "ok"
+        if name == "read":
+            full = os.path.join(self.cwd, kwargs["path"])
+            with open(full, "r", encoding="utf-8", errors="replace") as f:
+                return f.read()
+        if name == "delete":
+            full = os.path.join(self.cwd, kwargs["path"])
+            if os.path.isdir(full):
+                shutil.rmtree(full, ignore_errors=True)
+            elif os.path.exists(full):
+                os.remove(full)
+            return "ok"
+        if name == "bash":
+            proc = subprocess.run(kwargs["command"], shell=True, cwd=self.cwd,
+                                  capture_output=True, text=True, encoding="utf-8")
+            return (proc.stdout + proc.stderr).strip() or "ok"
+        raise ToolError(f"unknown tool: {name}")
 
     def reset(self, setup: Dict[str, Any] | None = None) -> None:
         if setup is not None:

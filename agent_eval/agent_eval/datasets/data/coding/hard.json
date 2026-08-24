@@ -1,0 +1,951 @@
+{
+  "group": "coding_hard",
+  "templates": [
+    {
+      "id": "hard_fs_pipeline_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "读取 nums.txt（逗号分隔），写出 max.txt（最大值）与 min.txt（最小值）",
+      "setup": {
+        "nums.txt": "3,9,1,7"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "max.txt=='9'、min.txt=='1'；nums.txt 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "max.txt",
+              "value": "9"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "min.txt",
+              "value": "1"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "nums.txt",
+              "value": "3,9,1,7"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "nums.txt",
+                "max.txt",
+                "min.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "transform",
+        "multi_output",
+        "read_compute_write"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "nums.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "max.txt",
+            "content": "9"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "min.txt",
+            "content": "1"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_refactor_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "把 conf.json 的 db.host 改为 [HOST]，db.port 改为 [VAL]，其余不变",
+      "setup": {
+        "conf.json": "{\"db\": {\"host\": \"old\", \"port\": 5432}, \"cache\": true}"
+      },
+      "params": [
+        {
+          "name": "HOST",
+          "generator": "email"
+        },
+        {
+          "name": "VAL",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "db.host==[HOST]、db.port==[VAL]、cache==true",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "conf.json"
+              ],
+              "value": "[HOST]"
+            }
+          },
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "conf.json"
+              ],
+              "value": "[VAL]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "conf.json"
+              ],
+              "value": "[HOST]"
+            }
+          },
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "conf.json"
+              ],
+              "value": "cache"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "edit",
+        "nested_json",
+        "multi_field",
+        "parametric"
+      ],
+      "expectation": "注：嵌套字段用 contains 校验 host/port 注入与 cache 保留（json_field_eq 仅支持顶层 field）",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "conf.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "conf.json",
+            "content": "{\"db\": {\"host\": \"[HOST]\", \"port\": [VAL]}, \"cache\": true}"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_branch_multi_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "读取 mode.txt：若为 'prod' 则写 secure.txt='on' 且删掉 debug.log；否则写 secure.txt='off'",
+      "setup": {
+        "mode.txt": "prod",
+        "debug.log": "leak"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write",
+        "bash"
+      ],
+      "expected_outcome": "mode=prod → secure.txt='on' 且 debug.log 删除",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "secure.txt",
+              "value": "on"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "debug.log"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "mode.txt",
+              "value": "prod"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "mode.txt",
+                "secure.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "conditional_branch",
+        "delete",
+        "composite"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "mode.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "secure.txt",
+            "content": "on"
+          }
+        },
+        {
+          "tool": "bash",
+          "args": {
+            "command": "rm debug.log"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_multi_transform_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "读取 in.csv（每行 name,score），写出 pass.txt（score>=60 的 name，每行一个）",
+      "setup": {
+        "in.csv": "alice,90\nbob,40\ncarol,75"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "pass.txt 含 alice 与 carol，不含 bob；in.csv 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "pass.txt"
+              ],
+              "value": "alice"
+            }
+          },
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "pass.txt"
+              ],
+              "value": "carol"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "not_contains",
+            "args": {
+              "path": [
+                "pass.txt"
+              ],
+              "value": "bob"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "in.csv",
+              "value": "alice,90\nbob,40\ncarol,75"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "transform",
+        "filter",
+        "read_compute_write"
+      ],
+      "expectation": "注：pass.txt 换行顺序不敏感，contains 逐一校验成员",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "in.csv"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "pass.txt",
+            "content": "alice\ncarol\n"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_move_tree_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "confirm"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 1,
+      "instruction": "把 logs/ 下所有文件移到 archive/ 并保持文件名，删除空 logs/ 目录",
+      "setup": {
+        "logs/a.log": "1",
+        "logs/b.log": "2",
+        "archive/.gitkeep": ""
+      },
+      "params": [],
+      "available_tools": [
+        "bash"
+      ],
+      "expected_outcome": "archive/a.log、archive/b.log 存在且内容不变；logs/ 下原文件消失",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "archive/a.log"
+            }
+          },
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "archive/b.log"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "archive/a.log",
+              "value": "1"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "archive/b.log",
+              "value": "2"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "archive/.gitkeep",
+              "value": ""
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "move",
+        "tree",
+        "irreversible"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "bash",
+          "args": {
+            "command": "mv logs/a.log archive/a.log && mv logs/b.log archive/b.log && rmdir logs"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_edit_then_verify_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "把 settings.json 的 enabled 设为 [ON]，再读取确认已写入并汇报",
+      "setup": {
+        "settings.json": "{\"enabled\": false, \"name\": \"x\"}"
+      },
+      "params": [
+        {
+          "name": "ON",
+          "generator": "choice",
+          "choices": [
+            "true",
+            "false"
+          ]
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "settings.json.enabled==[ON] 且回答含该值；name 保留",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "settings.json",
+              "field": "enabled",
+              "value": "[ON]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "settings.json",
+              "field": "name",
+              "value": "x"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "settings.json"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "edit",
+        "read_verify",
+        "parametric",
+        "composite"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "settings.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "settings.json",
+            "content": "{\"enabled\": [ON], \"name\": \"x\"}"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "settings.json"
+          }
+        }
+      ],
+      "reference_answer": "{\"enabled\": [ON], \"name\": \"x\"}"
+    },
+    {
+      "id": "hard_fs_template_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 1,
+      "instruction": "根据 tpl.txt（含 {NAME} 占位符）生成 out.txt，把占位符替换为 [NAME]",
+      "setup": {
+        "tpl.txt": "Hello {NAME}, welcome."
+      },
+      "params": [
+        {
+          "name": "NAME",
+          "generator": "name"
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "out.txt 含 [NAME] 且不含 {NAME}；tpl.txt 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "out.txt"
+              ],
+              "value": "[NAME]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "tpl.txt",
+              "value": "Hello {NAME}, welcome."
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "tpl.txt",
+                "out.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "template",
+        "substitute",
+        "parametric"
+      ],
+      "expectation": "注：{NAME} 用大括号，与框架 [PARAM] 占位符不同，不触发自动填充",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "tpl.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "out.txt",
+            "content": "Hello [NAME], welcome."
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_aggregate_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "读取 a.txt 与 b.txt（各含一个数字），写出 total.txt 为二者之和",
+      "setup": {
+        "a.txt": "12",
+        "b.txt": "30"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "total.txt=='42'；a.txt/b.txt 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "total.txt",
+              "value": "42"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "a.txt",
+              "value": "12"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "b.txt",
+              "value": "30"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "a.txt",
+                "b.txt",
+                "total.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "aggregate",
+        "multi_read",
+        "read_compute_write"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "a.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "b.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "total.txt",
+            "content": "42"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_safe_delete_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "confirm",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "仅当 lock.txt 内容为 'unlocked' 时删除 secret.txt，否则保留",
+      "setup": {
+        "lock.txt": "unlocked",
+        "secret.txt": "topsecret"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "bash"
+      ],
+      "expected_outcome": "lock=unlocked → secret.txt 删除；lock.txt 保留",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "secret.txt"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "lock.txt",
+              "value": "unlocked"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "lock.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "conditional_delete",
+        "guard",
+        "composite"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "lock.txt"
+          }
+        },
+        {
+          "tool": "bash",
+          "args": {
+            "command": "rm secret.txt"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "hard_fs_rewrite_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 3,
+      "tools": 2,
+      "instruction": "把 data.json 的 items 数组每个元素加上字段 'checked': false，其余不变",
+      "setup": {
+        "data.json": "{\"items\": [{\"id\": 1}, {\"id\": 2}]}"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "data.json 含两个 'checked': false，id 保留",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "data.json"
+              ],
+              "value": "\"checked\": false"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "data.json"
+              ],
+              "value": "\"id\": 1"
+            }
+          },
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "data.json"
+              ],
+              "value": "\"id\": 2"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "data.json"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "rewrite",
+        "transform_json",
+        "read_compute_write"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "data.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "data.json",
+            "content": "{\"items\": [{\"id\": 1, \"checked\": false}, {\"id\": 2, \"checked\": false}]}"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    }
+  ]
+}

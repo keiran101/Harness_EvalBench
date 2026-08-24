@@ -187,3 +187,157 @@ class BuggyAgent(ReferenceAgent):
         else:
             return super().run(instance, env)
         return traj
+
+
+class UnifiedMockAgent:
+    """Domain-agnostic perfect executor (unified Env era, 2026-08-23).
+
+    Drives the env purely from the template's verifier + setup, so it works for any
+    domain/backend without hard-coded template_id->path maps. It is a *mock* (knows
+    the answer from the verifier); real agents will not have this luxury. Used by the
+    official CLI (python -m agent_eval --agent mock) for in-process self-testing of
+    the whole pipeline on memory-backed (business) AND disk-backed (coding) tasks.
+    """
+
+    def __init__(self, name: str = "unified-mock"):
+        self.name = name
+
+    def run(self, instance, env) -> Trajectory:
+        import json as _json
+        traj = Trajectory()
+        caps = set(instance.capability)
+        before = self._snap(env)
+
+        # Clarify capability: ask, do NOT act (passes asked_clarification, no side effects)
+        if "clarify" in caps:
+            traj.answer = "请补充一下具体需求？"
+            return traj
+
+        # Confirm capability: request confirmation BEFORE the irreversible action.
+        # memory backend has a real confirm tool; disk backend records the step only
+        # (the verifier checks trajectory action prefix, not an env side-effect).
+        if "confirm" in caps:
+            if instance.env.get("backend") == "memory":
+                env.call_tool("confirm", reason="human-review")
+            traj.steps.append(self._step("confirm", "recorded", before, self._snap(env)))
+
+        # State-read / report capability: read then report the value
+        if "state_read" in caps:
+            for path in self._read_paths(instance):
+                b = self._snap(env)
+                obs = env.call_tool("read", path=path)
+                traj.steps.append(self._step(f"read:{path}", obs, b, self._snap(env)))
+            if instance.setup:
+                traj.answer = "当前值: " + " | ".join(
+                    str(v) for v in instance.setup.values()
+                )
+            return traj
+
+        # Tool-call capability: satisfy each fail_to_pass check by driving the env
+        if "tool_call" in caps:
+            self._satisfy_checks(instance, env, traj)
+            traj.answer = "done"
+            return traj
+
+        # Fallback: read-only no-op
+        traj.answer = "done"
+        return traj
+
+    # -- helpers ------------------------------------------------------------
+
+    @staticmethod
+    def _snap(env):
+        return env.get_state()
+
+    @staticmethod
+    def _step(action, obs, before, after, is_error=False, category=None):
+        return Step(action=action, observation=obs, state_before=before,
+                    state_after=after, is_error=is_error, error_category=category)
+
+    def _read_paths(self, instance):
+        """Paths the agent should read for a state_read task (best-effort).
+
+        - disk backend : setup keys ARE file paths (str)
+        - memory backend: pull the nested-dict path from verifier specs that read
+          setup (reported_value.value_path / state_eq.path / state_unchanged.path)
+        """
+        if instance.env.get("backend") == "disk":
+            # Only read SOURCE files already present in setup; targets the verifier
+            # expects the agent to WRITE must not be read (they don't exist yet).
+            return [k for k in instance.setup.keys()]
+        # memory backend: read the setup path the verifier inspects
+        paths = []
+        for c in instance.verifier.get("fail_to_pass", []) + instance.verifier.get("pass_to_pass", []):
+            if c.get("fn") in ("reported_value", "state_eq", "state_unchanged", "len_eq"):
+                p = c.get("args", {}).get("value_path") or c.get("args", {}).get("path")
+                if p and p not in paths:
+                    paths.append(p)
+        return paths
+
+    def _satisfy_checks(self, instance, env, traj):
+        """Drive the env so every fail_to_pass check becomes True."""
+        import json as _json
+        for c in instance.verifier.get("fail_to_pass", []):
+            fn = c.get("fn")
+            args = c.get("args", {})
+            if fn == "file_content_eq":
+                p, v = args["path"], args["value"]
+                b = self._snap(env)
+                env.call_tool("write", path=p, content=v)
+                traj.steps.append(self._step(f"write:{p}", "ok", b, self._snap(env)))
+            elif fn == "json_field_eq":
+                p, field, v = args["path"], args["field"], args["value"]
+                b = self._snap(env)
+                cur = _json.loads(env.call_tool("read", path=p))
+                cur[field] = self._coerce(v)
+                env.call_tool("write", path=p, content=_json.dumps(cur, ensure_ascii=False))
+                traj.steps.append(self._step(f"write:{p}({field})", "ok", b, self._snap(env)))
+            elif fn == "file_not_exists":
+                p = args["path"]
+                b = self._snap(env)
+                env.call_tool("bash", command=f"rm -f {p}")
+                traj.steps.append(self._step(f"bash:rm {p}", "ok", b, self._snap(env)))
+            elif fn == "file_exists":
+                pass  # already present in setup; nothing to do
+            elif fn in ("state_eq", "len_eq", "not_contains", "contains"):
+                self._memory_set(instance, env, traj, c)
+            elif fn == "irreversible_without_confirm":
+                pass  # handled by the confirm pre-step above
+
+    def _memory_set(self, instance, env, traj, c):
+        """Business-domain (memory backend) checks: set the target path to its value.
+
+        Mirrors a real agent's error recovery: a transient first-call failure (setup
+        flag _fail_first_call) is retried once.
+        """
+        from .environments.tool_env import ToolError
+        fn = c.get("fn")
+        args = c.get("args", {})
+        path = args.get("path")
+        if not path:
+            return
+        value = args.get("value")
+        b = self._snap(env)
+        if fn == "state_eq":
+            try:
+                env.call_tool("set", path=path, value=value)
+            except ToolError:
+                b2 = self._snap(env)
+                obs = env.call_tool("set", path=path, value=value)   # retry
+                traj.steps.append(self._step(f"set:{path[-1]}(retry)", obs, b2, self._snap(env)))
+                return
+            traj.steps.append(self._step(f"set:{path[-1]}", "ok", b, self._snap(env)))
+        elif fn in ("len_eq", "not_contains", "contains"):
+            pass  # assertions, not state mutations
+
+    @staticmethod
+    def _coerce(v):
+        if isinstance(v, (int, float, bool)):
+            return v
+        s = str(v)
+        if s.lower() in ("true", "false"):
+            return s.lower() == "true"
+        try:
+            return int(s)
+        except (TypeError, ValueError):
+            return v

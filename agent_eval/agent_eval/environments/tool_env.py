@@ -10,12 +10,14 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List
 
+from .base import BaseEnv
+
 
 class ToolError(Exception):
     """A tool call failed (transient or permanent)."""
 
 
-class ToolCallingEnv:
+class ToolCallingEnv(BaseEnv):
     def __init__(self, setup: Dict[str, Any]):
         self._setup = deepcopy(setup)
         self.state: Dict[str, Any] = deepcopy(setup)

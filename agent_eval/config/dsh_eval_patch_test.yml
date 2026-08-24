@@ -1,0 +1,13 @@
+- id: llm-deepseek
+  config:
+    thinking: disabled
+    reasoningEffort: off
+    models:
+      - id: google/gemma-4-12b-qat
+        contextWindow: 128000
+- id: agent-spine
+  config:
+    agents:
+      - id: main
+        provider: deepseek-official
+        model: google/gemma-4-12b-qat

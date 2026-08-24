@@ -3,7 +3,7 @@
 > 评估对象：`D:\MyFiles\agent-harness\pi-main`（Pi Agent Harness，MIT）
 > 评估目的：判断这个真实 agent harness 的**架构质量、评估体系完备度、可测性**，并给出「接入 `agent_eval` 框架完成评估」的可行路径与实测结果。
 > 评估视角：第六章「Agent 的评估」方法论（评估对象=模型+Harness 组合体；轨迹是评估单元；验证最终状态而非文本；失败可归因）。
-> 更新：已按评估设计实际接入 pi 并跑出正式指标（§9），见 `agent_eval/eval_pi_output.json`。
+> 更新：已按评估设计实际接入 pi 并跑出正式指标（§9），见 `results/pi_coding_llm.json`。
 
 ---
 
@@ -152,7 +152,7 @@ extensions.eval 稍好：`output()` 返回结构化布尔（systemPromptHasGuide
 | 环境 | `environments/fs_env.py`（FsEnv） | 真实临时目录：setup 写初始文件树，get_state 扫描最终文件树 |
 | 被测对象 | `pi-bridge.ts` + `pi_adapter.py` | **注入 fake ModelRuntime**（deterministic）驱动 pi 真实 AgentSession；工具（read/write/bash）真实执行 |
 | 验证 | `checks.py` 新增 6 个 fs 检查（file_content_eq/json_field_eq/file_exists/dir_entries_eq…） | FAIL_TO_PASS + PASS_TO_PASS + must_not_do 硬否决 |
-| 指标 | `run_pi_eval.py` → `agent_eval/eval_pi_output.json` | Pass@k / Pass^k / strict / 归因（k=2，seed 采样） |
+| 指标 | `run_pi_eval.py` → `results/pi_coding_llm.json` | Pass@k / Pass^k / strict / 归因（k=2，seed 采样） |
 
 注入方式（关键）：pi 的 `AgentSession` 把 LLM 调用抽象为 `modelRuntime.streamSimple(...)`；我们向 `createAgentSessionServices({modelRuntime: fake})` 注入一个按「工具剧本」回放的 deterministic ModelRuntime——**模型层确定性注入，Harness 层（工具注册/执行/状态/会话）100% 真实**。这正是第六章「评估对象=模型+Harness 组合体」中 Harness 侧的评估。
 

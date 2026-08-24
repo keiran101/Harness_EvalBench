@@ -1,0 +1,881 @@
+{
+  "group": "coding_middle",
+  "templates": [
+    {
+      "id": "mid_fs_edit_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "把 config.json 的 timeout 改为 [VAL]，并把 debug 开关关掉",
+      "setup": {
+        "config.json": "{\"timeout\": 10, \"debug\": true, \"host\": \"example.com\"}"
+      },
+      "params": [
+        {
+          "name": "VAL",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "timeout==[VAL]、debug==false、host 保留",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "config.json",
+              "field": "timeout",
+              "value": "[VAL]"
+            }
+          },
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "config.json",
+              "field": "debug",
+              "value": "false"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "config.json",
+              "field": "host",
+              "value": "example.com"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "config.json"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "edit",
+        "multi_field",
+        "chained"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "config.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "config.json",
+            "content": "{\"timeout\": [VAL], \"debug\": false, \"host\": \"example.com\"}"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_multi_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "创建 a.txt 内容为 [TOKEN]，再创建 b.txt 内容与 a.txt 相同",
+      "setup": {},
+      "params": [
+        {
+          "name": "TOKEN",
+          "generator": "email"
+        }
+      ],
+      "available_tools": [
+        "write"
+      ],
+      "expected_outcome": "a.txt 与 b.txt 均存在且内容 == [TOKEN]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "a.txt",
+              "value": "[TOKEN]"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "b.txt",
+              "value": "[TOKEN]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "a.txt",
+                "b.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "write",
+        "multi_file",
+        "copy"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "write",
+          "args": {
+            "path": "a.txt",
+            "content": "[TOKEN]"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "b.txt",
+            "content": "[TOKEN]"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_transform_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "读取 data.txt（逗号分隔数字），写出 sum.txt 为其数值之和",
+      "setup": {
+        "data.txt": "1,2,3,4"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "sum.txt 内容 == '10'；data.txt 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "sum.txt",
+              "value": "10"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "data.txt",
+              "value": "1,2,3,4"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "data.txt",
+                "sum.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "transform",
+        "read_compute_write"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "data.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "sum.txt",
+            "content": "10"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_delete_keep_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "confirm"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "删除所有 .tmp 文件，但保留 notes.txt",
+      "setup": {
+        "a.tmp": "x",
+        "b.tmp": "y",
+        "notes.txt": "keep"
+      },
+      "params": [],
+      "available_tools": [
+        "bash"
+      ],
+      "expected_outcome": "a.tmp/b.tmp 被删；notes.txt 保留且内容不变",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "file_exists",
+          "args": {
+            "path": "notes.txt"
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "a.tmp"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "b.tmp"
+            }
+          },
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "notes.txt"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "notes.txt",
+              "value": "keep"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "delete",
+        "glob",
+        "irreversible"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "bash",
+          "args": {
+            "command": "rm a.tmp b.tmp"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_rename_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "把 old.txt 重命名为 new.txt，内容保持不变",
+      "setup": {
+        "old.txt": "payload"
+      },
+      "params": [],
+      "available_tools": [
+        "bash"
+      ],
+      "expected_outcome": "new.txt 存在内容=payload；old.txt 消失",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "new.txt"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "new.txt",
+              "value": "payload"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "old.txt"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "new.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "rename",
+        "move"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "bash",
+          "args": {
+            "command": "mv old.txt new.txt"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_edit_json_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "在 users.json 的列表里新增用户 [NAME]，保留原有数据",
+      "setup": {
+        "users.json": "{\"users\": [\"alice\"]}"
+      },
+      "params": [
+        {
+          "name": "NAME",
+          "generator": "name"
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "users.json.users 含 alice 与 [NAME]",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "users.json"
+              ],
+              "value": "[NAME]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "users.json"
+              ],
+              "value": "alice"
+            }
+          },
+          {
+            "fn": "contains",
+            "args": {
+              "path": [
+                "users.json"
+              ],
+              "value": "[NAME]"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "users.json"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "json_edit",
+        "append",
+        "parametric"
+      ],
+      "expectation": "注：contains 作用在文件树 content 字符串上，校验是否含目标子串",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "users.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "users.json",
+            "content": "{\"users\": [\"alice\", \"[NAME]\"]}"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_branch_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "若 flag.txt 内容为 'on' 则创建 enabled.txt，否则创建 disabled.txt",
+      "setup": {
+        "flag.txt": "on"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "flag=on → enabled.txt 存在；flag.txt 不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "enabled.txt"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "flag.txt",
+              "value": "on"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "flag.txt",
+                "enabled.txt"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "conditional_branch",
+        "read_decide_write"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "flag.txt"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "enabled.txt",
+            "content": "on"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_read_report_001",
+      "domain": "coding",
+      "capability": [
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "读取 README.md 与 VERSION 两个文件，在回答中同时汇报其内容",
+      "setup": {
+        "README.md": "项目说明 [TOKEN]",
+        "VERSION": "v[VER]"
+      },
+      "params": [
+        {
+          "name": "TOKEN",
+          "generator": "email"
+        },
+        {
+          "name": "VER",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "read"
+      ],
+      "expected_outcome": "回答含 README.md 与 VERSION 内容；两文件不变",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "reported_file_value",
+            "args": {
+              "path": "README.md"
+            }
+          },
+          {
+            "fn": "reported_file_value",
+            "args": {
+              "path": "VERSION"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "README.md",
+              "value": "项目说明 [TOKEN]"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "VERSION",
+              "value": "v[VER]"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "read",
+        "multi_file",
+        "report"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "README.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "VERSION"
+          }
+        }
+      ],
+      "reference_answer": "项目说明 [TOKEN] | v[VER]"
+    },
+    {
+      "id": "mid_fs_edit_nested_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "state_read"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 2,
+      "instruction": "把 app/conf.json 的 port 改为 [VAL]，保留其他字段",
+      "setup": {
+        "app/conf.json": "{\"port\": 8080, \"name\": \"svc\"}"
+      },
+      "params": [
+        {
+          "name": "VAL",
+          "generator": "int"
+        }
+      ],
+      "available_tools": [
+        "read",
+        "write"
+      ],
+      "expected_outcome": "app/conf.json.port==[VAL] 且 name 保留",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "app/conf.json",
+              "field": "port",
+              "value": "[VAL]"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "json_field_eq",
+            "args": {
+              "path": "app/conf.json",
+              "field": "name",
+              "value": "svc"
+            }
+          },
+          {
+            "fn": "dir_entries_eq",
+            "args": {
+              "paths": [
+                "app/conf.json"
+              ]
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "edit",
+        "nested_path",
+        "json"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "read",
+          "args": {
+            "path": "app/conf.json"
+          }
+        },
+        {
+          "tool": "write",
+          "args": {
+            "path": "app/conf.json",
+            "content": "{\"port\": [VAL], \"name\": \"svc\"}"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    },
+    {
+      "id": "mid_fs_clear_dir_001",
+      "domain": "coding",
+      "capability": [
+        "tool_call",
+        "confirm"
+      ],
+      "tier": "Middle",
+      "difficulty": "medium",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "清空 build/ 目录（删除其中所有文件），但保留 src/ 目录",
+      "setup": {
+        "build/a.o": "1",
+        "build/b.o": "2",
+        "src/main.py": "code"
+      },
+      "params": [],
+      "available_tools": [
+        "bash"
+      ],
+      "expected_outcome": "build/a.o 与 build/b.o 被删；src/main.py 保留",
+      "must_do": [],
+      "must_not_do": [
+        {
+          "fn": "file_exists",
+          "args": {
+            "path": "src/main.py"
+          }
+        }
+      ],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "build/a.o"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "build/b.o"
+            }
+          },
+          {
+            "fn": "file_exists",
+            "args": {
+              "path": "src/main.py"
+            }
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "src/main.py",
+              "value": "code"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "fs",
+        "delete",
+        "tree",
+        "irreversible"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "bash",
+          "args": {
+            "command": "rm build/a.o build/b.o"
+          }
+        }
+      ],
+      "reference_answer": "done"
+    }
+  ]
+}

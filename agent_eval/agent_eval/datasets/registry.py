@@ -65,6 +65,33 @@ class DatasetRegistry:
                         reg._templates[tid] = t
         return reg
 
+    @classmethod
+    def from_dirs(cls, *directories: str, version: str = "0.1.0",
+                  leak_wire: bool = True) -> "DatasetRegistry":
+        """Merge several file-isolated dataset directories into ONE pool.
+
+        This is the key to 'datasets stay file-isolated, evaluation never splits':
+        each domain keeps its own folder (data/biz, data/coding, data/sql ...),
+        but they are merged here into a single registry so Evaluator treats them
+        as one unified set with one report.
+        """
+        reg = cls(version)
+        for d in directories:
+            sub = cls.from_dir(d, version=version, leak_wire=leak_wire)
+            for tid, t in sub._templates.items():
+                if tid in reg._templates:
+                    raise ValueError(f"duplicate template id across dirs: {tid}")
+                reg._templates[tid] = t
+        return reg
+
+    def merge(self, other: "DatasetRegistry") -> "DatasetRegistry":
+        """Merge another registry's templates into this one (in place)."""
+        for tid, t in other._templates.items():
+            if tid in self._templates:
+                raise ValueError(f"duplicate template id: {tid}")
+            self._templates[tid] = t
+        return self
+
     def register(self, template: TaskTemplate) -> None:
         self._templates[template.id] = template
 
