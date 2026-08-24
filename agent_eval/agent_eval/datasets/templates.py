@@ -86,6 +86,10 @@ class TaskTemplate:
     # tasks. May be empty -> the adapter falls back to no-op / empty answer.
     reference_plan: List[Dict[str, Any]] = field(default_factory=list)
     reference_answer: str = ""
+    # ---- retrieval coverage (2026-08-24) ----
+    # For info-gathering tasks on the disk backend: the set of relative file
+    # paths the agent SHOULD read. Coverage = viewed ∩ gold_docs / gold_docs.
+    gold_docs: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -123,6 +127,10 @@ class TaskInstance:
     # tasks. May be empty -> the adapter falls back to no-op / empty answer.
     reference_plan: List[Dict[str, Any]] = field(default_factory=list)
     reference_answer: str = ""
+    # ---- retrieval coverage (2026-08-24) ----
+    # For info-gathering tasks on the disk backend: the set of relative file
+    # paths the agent SHOULD read. Coverage = viewed ∩ gold_docs / gold_docs.
+    gold_docs: List[str] = field(default_factory=list)
 
 
 _GENERATORS = {
@@ -196,6 +204,7 @@ def _to_instance_fields(template: TaskTemplate, params: Dict[str, str],
         reference_plan=[{**c, "args": _fill_check_args(c.get("args", {}), params)}
                         for c in template.reference_plan],
         reference_answer=_fill(template.reference_answer, params),
+        gold_docs=[_fill(g, params) for g in (template.gold_docs or [])],
     )
 
 
@@ -235,6 +244,7 @@ def from_dict(d: dict) -> TaskTemplate:
         env=d.get("env", {"backend": "memory"}),
         reference_plan=d.get("reference_plan", []),
         reference_answer=d.get("reference_answer", ""),
+        gold_docs=d.get("gold_docs", []),
     )
 
 
@@ -264,4 +274,5 @@ def to_dict(t: TaskTemplate) -> dict:
         "env": t.env,
         "reference_plan": t.reference_plan,
         "reference_answer": t.reference_answer,
+        "gold_docs": t.gold_docs or [],
     }

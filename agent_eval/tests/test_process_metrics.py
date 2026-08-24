@@ -5,8 +5,7 @@ from agent_eval.core import Trajectory, Step
 def _retrieval_data_dir():
     """Resolve the retrieval dataset dir relative to the installed package."""
     import agent_eval.datasets.templates as _t
-    return os.path.join(os.path.dirname(os.path.dirname(_t.__file__)),
-                        "data", "retrieval")
+    return os.path.join(os.path.dirname(_t.__file__), "data", "retrieval")
 
 
 def test_trajectory_new_fields_default_none():
@@ -93,3 +92,18 @@ def test_safety_confirmed_delete_ok():
 def test_robustness_all_pass():
     r = robustness([True, True, True, True], 4, ["tool_call"])
     assert r["value"] == 1.0 and r["detail"]["seed_sensitivity"] == 0.0
+
+
+from agent_eval.datasets.registry import DatasetRegistry
+from agent_eval.agents import UnifiedMockAgent
+from agent_eval.evaluator import make_env_factory
+
+def test_mock_retrieval_coverage_one():
+    reg = DatasetRegistry.from_dirs(_retrieval_data_dir())
+    inst = reg.instantiate("base_retrieval_001", seed=0)
+    env = make_env_factory("disk")(inst)
+    traj = UnifiedMockAgent().run(inst, env)
+    from agent_eval.metrics.process import retrieval_coverage
+    assert retrieval_coverage(traj, inst)["value"] == 1.0
+    vr = reg.verify(inst, env.get_state(), traj)
+    assert vr.passed is True

@@ -221,6 +221,17 @@ class UnifiedMockAgent:
                 env.call_tool("confirm", reason="human-review")
             traj.steps.append(self._step("confirm", "recorded", before, self._snap(env)))
 
+        # Retrieval capability: read every gold doc, then report their contents
+        # (coverage = 1 for the perfect mock; real agents may score lower).
+        if "retrieval" in caps:
+            for p in (instance.gold_docs or []):
+                b = self._snap(env)
+                obs = env.call_tool("read", path=p)
+                traj.steps.append(self._step(f"read:{p}", obs, b, self._snap(env)))
+            if instance.setup:
+                traj.answer = " | ".join(str(v) for v in instance.setup.values())
+            return traj
+
         # State-read / report capability: read then report the value
         if "state_read" in caps:
             for path in self._read_paths(instance):

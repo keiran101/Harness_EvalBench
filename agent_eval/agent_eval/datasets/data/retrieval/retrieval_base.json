@@ -1,0 +1,84 @@
+{
+  "group": "retrieval_base",
+  "templates": [
+    {
+      "id": "base_retrieval_001",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 3,
+      "tools": 1,
+      "instruction": "请阅读 docs/ 下全部规格文档，并在回答中汇报各文档要点",
+      "setup": {
+        "docs/a.txt": "A: 认证走 OAuth2",
+        "docs/b.txt": "B: 限流 100 QPS",
+        "docs/c.txt": "C: 数据保留 30 天"
+      },
+      "params": [],
+      "available_tools": ["read"],
+      "expected_outcome": "读全 3 个文档并汇报",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "docs/a.txt"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "docs/c.txt", "value": "C: 数据保留 30 天"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "read_all"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "read", "args": {"path": "docs/a.txt"}},
+        {"tool": "read", "args": {"path": "docs/b.txt"}},
+        {"tool": "read", "args": {"path": "docs/c.txt"}}
+      ],
+      "reference_answer": "A: 认证走 OAuth2 | B: 限流 100 QPS | C: 数据保留 30 天",
+      "gold_docs": ["docs/a.txt", "docs/b.txt", "docs/c.txt"]
+    },
+    {
+      "id": "base_retrieval_002",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "base",
+      "difficulty": "easy",
+      "steps": 2,
+      "tools": 1,
+      "instruction": "定位并阅读 changelog 与 readme（notes.txt 是干扰项，无需读）",
+      "setup": {
+        "changelog.md": "v2: 新增检索指标",
+        "readme.md": "用法见 docs",
+        "notes.txt": "临时草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read"],
+      "expected_outcome": "读 changelog.md + readme.md，覆盖率=1；只读其一=0.5",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "changelog.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "notes.txt", "value": "临时草稿，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "read", "args": {"path": "changelog.md"}},
+        {"tool": "read", "args": {"path": "readme.md"}}
+      ],
+      "reference_answer": "v2: 新增检索指标 | 用法见 docs",
+      "gold_docs": ["changelog.md", "readme.md"]
+    }
+  ]
+}
