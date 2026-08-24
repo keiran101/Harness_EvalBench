@@ -1,0 +1,430 @@
+{
+  "group": "retrieval_middle",
+  "templates": [
+    {
+      "id": "middle_retrieval_001",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "项目有多个子目录，请找出所有配置相关文件（config/ 下与根目录的 settings.yaml）并汇报其关键项；tmp/ 与 logs/ 里是运行产物，无需读取",
+      "setup": {
+        "config/app.conf": "app.conf: 监听端口 8080",
+        "config/db.conf": "db.conf: 连接池 20",
+        "settings.yaml": "settings: 时区 Asia/Shanghai",
+        "tmp/cache.tmp": "临时缓存，忽略",
+        "logs/run.log": "运行日志，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 3 个配置文件（config/app.conf、config/db.conf、settings.yaml），覆盖率=1；tmp/ 与 logs/ 为干扰项不应读",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "config/db.conf"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_not_exists", "args": {"path": "tmp/modified.tmp"}},
+          {"fn": "file_content_eq", "args": {"path": "logs/run.log", "value": "运行日志，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "."}},
+        {"tool": "read", "args": {"path": "config/app.conf"}},
+        {"tool": "read", "args": {"path": "config/db.conf"}},
+        {"tool": "read", "args": {"path": "settings.yaml"}}
+      ],
+      "reference_answer": "app.conf: 监听端口 8080 | db.conf: 连接池 20 | settings: 时区 Asia/Shanghai",
+      "gold_docs": ["config/app.conf", "config/db.conf", "settings.yaml"]
+    },
+    {
+      "id": "middle_retrieval_002",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 6,
+      "tools": 3,
+      "instruction": "源码分 src/ 与 tests/ 两个目录。请只读取业务源码（src/ 下），tests/ 是测试代码无需读，并汇报各模块职责",
+      "setup": {
+        "src/user.py": "user: 用户模型",
+        "src/order.py": "order: 订单模型",
+        "src/pay.py": "pay: 支付逻辑",
+        "tests/test_user.py": "测试，忽略",
+        "tests/test_order.py": "测试，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 src/ 下 3 个，覆盖率=1；tests/ 为干扰项",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "src/pay.py"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_not_exists", "args": {"path": "src/_scratch.py"}},
+          {"fn": "file_content_eq", "args": {"path": "tests/test_user.py", "value": "测试，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "src"}},
+        {"tool": "read", "args": {"path": "src/user.py"}},
+        {"tool": "read", "args": {"path": "src/order.py"}},
+        {"tool": "read", "args": {"path": "src/pay.py"}}
+      ],
+      "reference_answer": "user: 用户模型 | order: 订单模型 | pay: 支付逻辑",
+      "gold_docs": ["src/user.py", "src/order.py", "src/pay.py"]
+    },
+    {
+      "id": "middle_retrieval_003",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "文档分散在 docs/ 与 docs/guide/ 两级目录，请读取所有文档（共 4 份）并汇报结构",
+      "setup": {
+        "docs/intro.md": "intro: 概述",
+        "docs/quickstart.md": "quickstart: 快速开始",
+        "docs/guide/install.md": "install: 安装",
+        "docs/guide/tuning.md": "tuning: 调优",
+        "docs/draft/old.md": "旧草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 4 份正式文档，覆盖率=1；draft/ 为干扰项",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "docs/guide/tuning.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "docs/draft/old.md", "value": "旧草稿，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "docs"}},
+        {"tool": "read", "args": {"path": "docs/intro.md"}},
+        {"tool": "read", "args": {"path": "docs/quickstart.md"}},
+        {"tool": "read", "args": {"path": "docs/guide/install.md"}},
+        {"tool": "read", "args": {"path": "docs/guide/tuning.md"}}
+      ],
+      "reference_answer": "intro: 概述 | quickstart: 快速开始 | install: 安装 | tuning: 调优",
+      "gold_docs": ["docs/intro.md", "docs/quickstart.md", "docs/guide/install.md", "docs/guide/tuning.md"]
+    },
+    {
+      "id": "middle_retrieval_004",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "找出所有迁移脚本（migrations/ 下 .sql 文件）并汇报版本号；migrations/tmp/ 下是草稿不要读",
+      "setup": {
+        "migrations/001_init.sql": "v1: 建表",
+        "migrations/002_add_idx.sql": "v2: 加索引",
+        "migrations/003_arch.sql": "v3: 归档",
+        "migrations/tmp/scratch.sql": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 3 个正式迁移，覆盖率=1；tmp/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "migrations/002_add_idx.sql"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "migrations/tmp/scratch.sql", "value": "草稿，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "migrations"}},
+        {"tool": "read", "args": {"path": "migrations/001_init.sql"}},
+        {"tool": "read", "args": {"path": "migrations/002_add_idx.sql"}},
+        {"tool": "read", "args": {"path": "migrations/003_arch.sql"}}
+      ],
+      "reference_answer": "v1: 建表 | v2: 加索引 | v3: 归档",
+      "gold_docs": ["migrations/001_init.sql", "migrations/002_add_idx.sql", "migrations/003_arch.sql"]
+    },
+    {
+      "id": "middle_retrieval_005",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 6,
+      "tools": 3,
+      "instruction": "服务配置在 deploy/ 与 deploy/overrides/ 两级，请读取全部配置文件（.yaml）并汇报环境差异；deploy/cache/ 是缓存忽略",
+      "setup": {
+        "deploy/base.yaml": "base: 2 副本",
+        "deploy/prod.yaml": "prod: 5 副本",
+        "deploy/overrides/redis.yaml": "redis: 开启",
+        "deploy/overrides/mq.yaml": "mq: 关闭",
+        "deploy/cache/snapshot.yaml": "缓存快照，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 4 个正式配置，覆盖率=1；cache/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "deploy/overrides/mq.yaml"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "deploy/cache/snapshot.yaml", "value": "缓存快照，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "deploy"}},
+        {"tool": "read", "args": {"path": "deploy/base.yaml"}},
+        {"tool": "read", "args": {"path": "deploy/prod.yaml"}},
+        {"tool": "read", "args": {"path": "deploy/overrides/redis.yaml"}},
+        {"tool": "read", "args": {"path": "deploy/overrides/mq.yaml"}}
+      ],
+      "reference_answer": "base: 2 副本 | prod: 5 副本 | redis: 开启 | mq: 关闭",
+      "gold_docs": ["deploy/base.yaml", "deploy/prod.yaml", "deploy/overrides/redis.yaml", "deploy/overrides/mq.yaml"]
+    },
+    {
+      "id": "middle_retrieval_006",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "根目录与 sub/ 下各有一份同名 report.md，请读取两份并对比（注意区分路径）；sub/tmp/ 无关",
+      "setup": {
+        "report.md": "root report: 全局概览",
+        "sub/report.md": "sub report: 子模块明细",
+        "sub/tmp/notes.md": "临时，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 2 份 report.md（不同路径），覆盖率=1；tmp/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "sub/report.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "sub/tmp/notes.md", "value": "临时，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "same_name"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "."}},
+        {"tool": "read", "args": {"path": "report.md"}},
+        {"tool": "read", "args": {"path": "sub/report.md"}}
+      ],
+      "reference_answer": "root report: 全局概览 | sub report: 子模块明细",
+      "gold_docs": ["report.md", "sub/report.md"]
+    },
+    {
+      "id": "middle_retrieval_007",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 6,
+      "tools": 3,
+      "instruction": "插件在 plugins/ 下每个子目录一份 manifest.json，请读取全部 3 个 manifest 并汇报插件名；plugins/_disabled/ 忽略",
+      "setup": {
+        "plugins/a/manifest.json": "plugin: A",
+        "plugins/b/manifest.json": "plugin: B",
+        "plugins/c/manifest.json": "plugin: C",
+        "plugins/_disabled/d/manifest.json": "已禁用，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 3 个启用插件 manifest，覆盖率=1；_disabled/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "plugins/b/manifest.json"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "plugins/_disabled/d/manifest.json", "value": "已禁用，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "plugins"}},
+        {"tool": "read", "args": {"path": "plugins/a/manifest.json"}},
+        {"tool": "read", "args": {"path": "plugins/b/manifest.json"}},
+        {"tool": "read", "args": {"path": "plugins/c/manifest.json"}}
+      ],
+      "reference_answer": "plugin: A | plugin: B | plugin: C",
+      "gold_docs": ["plugins/a/manifest.json", "plugins/b/manifest.json", "plugins/c/manifest.json"]
+    },
+    {
+      "id": "middle_retrieval_008",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "i18n 文案在 locales/ 下按语言分目录，请读取 en 与 zh 两份主文案并汇报缺失项；locales/_legacy/ 忽略",
+      "setup": {
+        "locales/en/messages.json": "en: hello",
+        "locales/zh/messages.json": "zh: 你好",
+        "locales/_legacy/messages.json": "旧版，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 en/zh 两份，覆盖率=1；_legacy/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "locales/zh/messages.json"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "locales/_legacy/messages.json", "value": "旧版，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "locales"}},
+        {"tool": "read", "args": {"path": "locales/en/messages.json"}},
+        {"tool": "read", "args": {"path": "locales/zh/messages.json"}}
+      ],
+      "reference_answer": "en: hello | zh: 你好",
+      "gold_docs": ["locales/en/messages.json", "locales/zh/messages.json"]
+    },
+    {
+      "id": "middle_retrieval_009",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 6,
+      "tools": 3,
+      "instruction": "监控规则在 rules/ 与 rules/alerts/ 两级，请读取全部 .rule 文件并汇报触发条件；rules/disabled/ 忽略",
+      "setup": {
+        "rules/cpu.rule": "cpu>90%",
+        "rules/mem.rule": "mem>85%",
+        "rules/alerts/disk.rule": "disk>95%",
+        "rules/alerts/net.rule": "net>1G",
+        "rules/disabled/old.rule": "旧规则，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 4 个正式规则，覆盖率=1；disabled/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "rules/alerts/net.rule"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "rules/disabled/old.rule", "value": "旧规则，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "distractor"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "rules"}},
+        {"tool": "read", "args": {"path": "rules/cpu.rule"}},
+        {"tool": "read", "args": {"path": "rules/mem.rule"}},
+        {"tool": "read", "args": {"path": "rules/alerts/disk.rule"}},
+        {"tool": "read", "args": {"path": "rules/alerts/net.rule"}}
+      ],
+      "reference_answer": "cpu>90% | mem>85% | disk>95% | net>1G",
+      "gold_docs": ["rules/cpu.rule", "rules/mem.rule", "rules/alerts/disk.rule", "rules/alerts/net.rule"]
+    },
+    {
+      "id": "middle_retrieval_010",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "主题在 themes/ 下，每个主题有 light.css 与 dark.css，请读取 default 主题的两种配色；themes/_beta/ 忽略",
+      "setup": {
+        "themes/default/light.css": "default-light: #fff",
+        "themes/default/dark.css": "default-dark: #000",
+        "themes/alt/light.css": "alt-light: #eee",
+        "themes/_beta/light.css": "实验，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读全 default 主题 2 份配色，覆盖率=1；alt/_beta 为干扰（非 default）",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "themes/default/dark.css"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "themes/_beta/light.css", "value": "实验，忽略"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "nested_dir", "selective"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "themes"}},
+        {"tool": "read", "args": {"path": "themes/default/light.css"}},
+        {"tool": "read", "args": {"path": "themes/default/dark.css"}}
+      ],
+      "reference_answer": "default-light: #fff | default-dark: #000",
+      "gold_docs": ["themes/default/light.css", "themes/default/dark.css"]
+    }
+  ]
+}

@@ -1,0 +1,440 @@
+{
+  "group": "retrieval_hard",
+  "templates": [
+    {
+      "id": "hard_retrieval_001",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 8,
+      "tools": 3,
+      "instruction": "这是一份多模块规格仓库。请只检索与「鉴权（auth）」相关的文档并汇报要点；data/ 下的样例数据与 archive/ 下的历史版本不属于本次范围，读取它们会拖慢且干扰结论",
+      "setup": {
+        "spec/auth.md": "auth: JWT 过期 15min",
+        "spec/auth_flow.md": "auth_flow: 三步握手",
+        "spec/rate_limit.md": "rate_limit: 滑动窗口",
+        "data/sample_users.csv": "id,name",
+        "archive/auth_v1.md": "auth_v1: 已废弃",
+        "archive/old_notes.md": "旧笔记，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "精准读取 2 个鉴权文档（spec/auth.md、spec/auth_flow.md），覆盖率相对 gold=1；读 rate_limit 或 archive 文件属噪声；漏掉任一 gold 则覆盖率<1",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "spec/auth_flow.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "data/sample_users.csv", "value": "id,name"}},
+          {"fn": "file_not_exists", "args": {"path": "spec/_scratch.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "spec"}},
+        {"tool": "read", "args": {"path": "spec/auth.md"}},
+        {"tool": "read", "args": {"path": "spec/auth_flow.md"}}
+      ],
+      "reference_answer": "auth: JWT 过期 15min | auth_flow: 三步握手",
+      "gold_docs": ["spec/auth.md", "spec/auth_flow.md"]
+    },
+    {
+      "id": "hard_retrieval_002",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 9,
+      "tools": 3,
+      "instruction": "仓库含支付（pay）与风控（risk）两大模块文档混放。请只提取支付模块的核心三份（pay_api.md、pay_callback.md、pay_refund.md）并汇报；risk/ 与 pay_draft/ 是噪声",
+      "setup": {
+        "pay_api.md": "pay_api: 下单接口",
+        "pay_callback.md": "pay_callback: 异步回调",
+        "pay_refund.md": "pay_refund: 退款流程",
+        "risk_rule.md": "risk: 黑名单",
+        "risk_model.md": "risk: 评分卡",
+        "pay_draft/v2.md": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "精准读取 3 份 pay 核心文档，覆盖率=1；risk/、pay_draft/ 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "pay_refund.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "risk_model.md", "value": "risk: 评分卡"}},
+          {"fn": "file_not_exists", "args": {"path": "pay/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "."}},
+        {"tool": "read", "args": {"path": "pay_api.md"}},
+        {"tool": "read", "args": {"path": "pay_callback.md"}},
+        {"tool": "read", "args": {"path": "pay_refund.md"}}
+      ],
+      "reference_answer": "pay_api: 下单接口 | pay_callback: 异步回调 | pay_refund: 退款流程",
+      "gold_docs": ["pay_api.md", "pay_callback.md", "pay_refund.md"]
+    },
+    {
+      "id": "hard_retrieval_003",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 10,
+      "tools": 3,
+      "instruction": "分布式系统文档分散在 modules/ 下多个子服务中。请只提取与「存储层（storage）」相关的文档：modules/store/ 与 modules/cache/ 下的 overview.md，忽略 gateway/ 与 compute/ 模块",
+      "setup": {
+        "modules/store/overview.md": "store: 分库分表",
+        "modules/cache/overview.md": "cache: 多级缓存",
+        "modules/gateway/overview.md": "gateway: 路由",
+        "modules/compute/overview.md": "compute: 调度",
+        "modules/store/legacy.md": "store 旧版，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 storage 相关 2 份 overview，覆盖率=1；gateway/compute/legacy 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "modules/cache/overview.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "modules/compute/overview.md", "value": "compute: 调度"}},
+          {"fn": "file_not_exists", "args": {"path": "modules/store/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "modules"}},
+        {"tool": "read", "args": {"path": "modules/store/overview.md"}},
+        {"tool": "read", "args": {"path": "modules/cache/overview.md"}}
+      ],
+      "reference_answer": "store: 分库分表 | cache: 多级缓存",
+      "gold_docs": ["modules/store/overview.md", "modules/cache/overview.md"]
+    },
+    {
+      "id": "hard_retrieval_004",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 9,
+      "tools": 3,
+      "instruction": "知识库含多版本文档 v1/ v2/ v3/，请只读取最新版（v3/）下与「部署」相关的 deploy.md 与 ops.md；其他版本与 docs/ 概览不要读",
+      "setup": {
+        "v3/deploy.md": "v3 deploy: k8s",
+        "v3/ops.md": "v3 ops: 监控",
+        "v2/deploy.md": "v2 deploy: 虚拟机",
+        "v1/deploy.md": "v1 deploy: 物理机",
+        "docs/overview.md": "概览，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 v3 下 2 份，覆盖率=1；v1/v2/docs 为噪声（版本混淆）",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "v3/ops.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "v1/deploy.md", "value": "v1 deploy: 物理机"}},
+          {"fn": "file_not_exists", "args": {"path": "v3/_scratch.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "version_confusion"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "v3"}},
+        {"tool": "read", "args": {"path": "v3/deploy.md"}},
+        {"tool": "read", "args": {"path": "v3/ops.md"}}
+      ],
+      "reference_answer": "v3 deploy: k8s | v3 ops: 监控",
+      "gold_docs": ["v3/deploy.md", "v3/ops.md"]
+    },
+    {
+      "id": "hard_retrieval_005",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 11,
+      "tools": 3,
+      "instruction": "事故复盘仓库含 incident/ 与 postmortem/ 两类文档。请只提取 incident/ 下标记为 P0 的两份（inc_001.md、inc_002.md），postmortem/ 与外部 timeline.md 不在范围",
+      "setup": {
+        "incident/inc_001.md": "P0: 支付中断",
+        "incident/inc_002.md": "P0: 缓存雪崩",
+        "incident/inc_003.md": "P1: 延迟升高",
+        "postmortem/pm_001.md": "复盘，忽略",
+        "timeline.md": "时间线，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 P0 两份，覆盖率=1；P1/postmortem/timeline 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "incident/inc_002.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "incident/inc_003.md", "value": "P1: 延迟升高"}},
+          {"fn": "file_not_exists", "args": {"path": "incident/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "incident"}},
+        {"tool": "read", "args": {"path": "incident/inc_001.md"}},
+        {"tool": "read", "args": {"path": "incident/inc_002.md"}}
+      ],
+      "reference_answer": "P0: 支付中断 | P0: 缓存雪崩",
+      "gold_docs": ["incident/inc_001.md", "incident/inc_002.md"]
+    },
+    {
+      "id": "hard_retrieval_006",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 10,
+      "tools": 3,
+      "instruction": "合规文档分 GDPR/ 与 CCPA/ 两个法域，且各有 draft/ 草稿。请只提取 GDPR 的正式生效文档 gdpr/main.md 与 gdpr/terms.md；所有 draft/ 与 ccpa/ 忽略",
+      "setup": {
+        "gdpr/main.md": "gdpr: 数据主体权利",
+        "gdpr/terms.md": "gdpr: 处理条款",
+        "gdpr/draft/next.md": "草稿，忽略",
+        "ccpa/main.md": "ccpa: 退出权",
+        "ccpa/draft/next.md": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 GDPR 正式 2 份，覆盖率=1；draft/ 与 ccpa/ 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "gdpr/terms.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "ccpa/main.md", "value": "ccpa: 退出权"}},
+          {"fn": "file_not_exists", "args": {"path": "gdpr/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "gdpr"}},
+        {"tool": "read", "args": {"path": "gdpr/main.md"}},
+        {"tool": "read", "args": {"path": "gdpr/terms.md"}}
+      ],
+      "reference_answer": "gdpr: 数据主体权利 | gdpr: 处理条款",
+      "gold_docs": ["gdpr/main.md", "gdpr/terms.md"]
+    },
+    {
+      "id": "hard_retrieval_007",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 12,
+      "tools": 3,
+      "instruction": "微服务仓库 services/ 下每个服务有 README 与 CHANGELOG，还有共用的 DEPRECATED 列表。请只提取 services/ 下 4 个活跃服务的 README（忽略 svc_legacy 与所有 CHANGELOG）",
+      "setup": {
+        "services/order/README.md": "order: 下单",
+        "services/user/README.md": "user: 账户",
+        "services/pay/README.md": "pay: 收单",
+        "services/notify/README.md": "notify: 通知",
+        "services/svc_legacy/README.md": "废弃，忽略",
+        "services/order/CHANGELOG.md": "变更，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 4 个活跃服务 README，覆盖率=1；legacy/CHANGELOG 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "services/pay/README.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "services/svc_legacy/README.md", "value": "废弃，忽略"}},
+          {"fn": "file_not_exists", "args": {"path": "services/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "services"}},
+        {"tool": "read", "args": {"path": "services/order/README.md"}},
+        {"tool": "read", "args": {"path": "services/user/README.md"}},
+        {"tool": "read", "args": {"path": "services/pay/README.md"}},
+        {"tool": "read", "args": {"path": "services/notify/README.md"}}
+      ],
+      "reference_answer": "order: 下单 | user: 账户 | pay: 收单 | notify: 通知",
+      "gold_docs": ["services/order/README.md", "services/user/README.md", "services/pay/README.md", "services/notify/README.md"]
+    },
+    {
+      "id": "hard_retrieval_008",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 11,
+      "tools": 3,
+      "instruction": "算法文档在 algo/ 下按类别分目录。请只提取与「排序（sort）」相关的三份：algo/sort/quick.md、algo/sort/merge.md、algo/sort/heap.md；algo/graph/ 与 algo/sort/_notes.md 忽略",
+      "setup": {
+        "algo/sort/quick.md": "quick: 平均 O(nlogn)",
+        "algo/sort/merge.md": "merge: 稳定",
+        "algo/sort/heap.md": "heap: 原地",
+        "algo/graph/bfs.md": "bfs: 层序",
+        "algo/sort/_notes.md": "笔记，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 sort 类 3 份，覆盖率=1；graph/notes 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "algo/sort/heap.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "algo/graph/bfs.md", "value": "bfs: 层序"}},
+          {"fn": "file_not_exists", "args": {"path": "algo/sort/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "algo/sort"}},
+        {"tool": "read", "args": {"path": "algo/sort/quick.md"}},
+        {"tool": "read", "args": {"path": "algo/sort/merge.md"}},
+        {"tool": "read", "args": {"path": "algo/sort/heap.md"}}
+      ],
+      "reference_answer": "quick: 平均 O(nlogn) | merge: 稳定 | heap: 原地",
+      "gold_docs": ["algo/sort/quick.md", "algo/sort/merge.md", "algo/sort/heap.md"]
+    },
+    {
+      "id": "hard_retrieval_009",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 10,
+      "tools": 3,
+      "instruction": "合同模板仓库 templates/ 下每个客户一份，但只有 active/ 子目录是当前生效的。请提取 active/ 下 client_a 与 client_b 的合同（合同名含 contract）；archived/ 与 active/client_c 草稿忽略",
+      "setup": {
+        "templates/active/client_a_contract.md": "a: 年框",
+        "templates/active/client_b_contract.md": "b: 项目制",
+        "templates/active/client_c_draft.md": "草稿，忽略",
+        "templates/archived/client_a_contract.md": "旧版，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 active 下 2 份生效合同，覆盖率=1；draft/archived 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "templates/active/client_b_contract.md"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "templates/archived/client_a_contract.md", "value": "旧版，忽略"}},
+          {"fn": "file_not_exists", "args": {"path": "templates/active/_tmp.md"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "templates/active"}},
+        {"tool": "read", "args": {"path": "templates/active/client_a_contract.md"}},
+        {"tool": "read", "args": {"path": "templates/active/client_b_contract.md"}}
+      ],
+      "reference_answer": "a: 年框 | b: 项目制",
+      "gold_docs": ["templates/active/client_a_contract.md", "templates/active/client_b_contract.md"]
+    },
+    {
+      "id": "hard_retrieval_010",
+      "domain": "retrieval",
+      "capability": ["retrieval"],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 12,
+      "tools": 3,
+      "instruction": "监控大盘配置在 dashboards/ 下，每个面板有 json；但只有 prod/ 环境的是真实面板，staging/ 与 dashboards/_tmp/ 是测试。请提取 prod/ 下 latency.json 与 error_rate.json 两份核心面板",
+      "setup": {
+        "dashboards/prod/latency.json": "latency: p99",
+        "dashboards/prod/error_rate.json": "error_rate: 5xx",
+        "dashboards/staging/latency.json": "staging，忽略",
+        "dashboards/_tmp/draft.json": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": ["read", "ls", "find"],
+      "expected_outcome": "读取 prod 下 2 份核心面板，覆盖率=1；staging/_tmp 为噪声（同名混淆）",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {"fn": "reported_file_value", "args": {"path": "dashboards/prod/error_rate.json"}}
+        ],
+        "pass_to_pass": [
+          {"fn": "file_content_eq", "args": {"path": "dashboards/staging/latency.json", "value": "staging，忽略"}},
+          {"fn": "file_not_exists", "args": {"path": "dashboards/prod/_scratch.json"}}
+        ]
+      },
+      "grader": {"type": "rule"},
+      "leak_guard": {},
+      "tags": ["retrieval", "selective", "same_name", "noise"],
+      "expectation": "",
+      "env": {"backend": "disk"},
+      "reference_plan": [
+        {"tool": "ls", "args": {"path": "dashboards/prod"}},
+        {"tool": "read", "args": {"path": "dashboards/prod/latency.json"}},
+        {"tool": "read", "args": {"path": "dashboards/prod/error_rate.json"}}
+      ],
+      "reference_answer": "latency: p99 | error_rate: 5xx",
+      "gold_docs": ["dashboards/prod/latency.json", "dashboards/prod/error_rate.json"]
+    }
+  ]
+}
