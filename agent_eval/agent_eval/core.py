@@ -30,6 +30,11 @@ class Trajectory:
     steps: list[Step] = field(default_factory=list)
     # Agent's final answer (used by state_read / clarify / confirm verifiers)
     answer: Optional[str] = None
+    # ---- process-metrics fields (2026-08-24) ----
+    # Round-level wall-clock latency of agent.run(), filled by Evaluator (ms).
+    latency_ms: Optional[float] = None
+    # Reserved: total LLM/tool requests in the round (adapters may set; may be None).
+    request_count: Optional[int] = None
 
     def first_error_step(self) -> Optional[int]:
         for i, s in enumerate(self.steps):
