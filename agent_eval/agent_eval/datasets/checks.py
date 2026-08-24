@@ -167,6 +167,18 @@ def reported_file_value(inst, s, t, path=None, **_):
     return t.answer is not None and str(inst.setup[path]) in t.answer
 
 
+def retrieval_covered(inst, s, t, **_):
+    """Retrieval 域成败的核心判据：agent 的轨迹是否覆盖全部 gold_docs。
+
+    替代过严的 `reported_file_value`（要求 answer 逐字复述原文），改测
+    '是否真的读到目标文件'——这才是检索任务的本质。coverage==1.0 才过。
+    实现复用 metrics.process.retrieval_coverage，避免口径漂移。
+    """
+    from ..metrics.process import retrieval_coverage
+    m = retrieval_coverage(t, inst)
+    return bool(m.get("available")) and m.get("value") == 1.0
+
+
 CHECK_REGISTRY: Dict[str, Callable] = {
     "state_eq": state_eq,
     "state_unchanged": state_unchanged,
@@ -187,6 +199,7 @@ CHECK_REGISTRY: Dict[str, Callable] = {
     "dir_entries_eq": dir_entries_eq,
     "json_field_eq": json_field_eq,
     "reported_file_value": reported_file_value,
+    "retrieval_covered": retrieval_covered,
 }
 
 

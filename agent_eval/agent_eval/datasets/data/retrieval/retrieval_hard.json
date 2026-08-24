@@ -4,7 +4,9 @@
     {
       "id": "hard_retrieval_001",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 8,
@@ -19,36 +21,81 @@
         "archive/old_notes.md": "旧笔记，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "精准读取 2 个鉴权文档（spec/auth.md、spec/auth_flow.md），覆盖率相对 gold=1；读 rate_limit 或 archive 文件属噪声；漏掉任一 gold 则覆盖率<1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "spec/auth_flow.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "data/sample_users.csv", "value": "id,name"}},
-          {"fn": "file_not_exists", "args": {"path": "spec/_scratch.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "data/sample_users.csv",
+              "value": "id,name"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "spec/_scratch.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "spec"}},
-        {"tool": "read", "args": {"path": "spec/auth.md"}},
-        {"tool": "read", "args": {"path": "spec/auth_flow.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "spec"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "spec/auth.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "spec/auth_flow.md"
+          }
+        }
       ],
       "reference_answer": "auth: JWT 过期 15min | auth_flow: 三步握手",
-      "gold_docs": ["spec/auth.md", "spec/auth_flow.md"]
+      "gold_docs": [
+        "spec/auth.md",
+        "spec/auth_flow.md"
+      ]
     },
     {
       "id": "hard_retrieval_002",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 9,
@@ -63,37 +110,88 @@
         "pay_draft/v2.md": "草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "精准读取 3 份 pay 核心文档，覆盖率=1；risk/、pay_draft/ 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "pay_refund.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "risk_model.md", "value": "risk: 评分卡"}},
-          {"fn": "file_not_exists", "args": {"path": "pay/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "risk_model.md",
+              "value": "risk: 评分卡"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "pay/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "."}},
-        {"tool": "read", "args": {"path": "pay_api.md"}},
-        {"tool": "read", "args": {"path": "pay_callback.md"}},
-        {"tool": "read", "args": {"path": "pay_refund.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "."
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_api.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_callback.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_refund.md"
+          }
+        }
       ],
       "reference_answer": "pay_api: 下单接口 | pay_callback: 异步回调 | pay_refund: 退款流程",
-      "gold_docs": ["pay_api.md", "pay_callback.md", "pay_refund.md"]
+      "gold_docs": [
+        "pay_api.md",
+        "pay_callback.md",
+        "pay_refund.md"
+      ]
     },
     {
       "id": "hard_retrieval_003",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 10,
@@ -107,36 +205,81 @@
         "modules/store/legacy.md": "store 旧版，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 storage 相关 2 份 overview，覆盖率=1；gateway/compute/legacy 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "modules/cache/overview.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "modules/compute/overview.md", "value": "compute: 调度"}},
-          {"fn": "file_not_exists", "args": {"path": "modules/store/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "modules/compute/overview.md",
+              "value": "compute: 调度"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "modules/store/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "modules"}},
-        {"tool": "read", "args": {"path": "modules/store/overview.md"}},
-        {"tool": "read", "args": {"path": "modules/cache/overview.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "modules"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "modules/store/overview.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "modules/cache/overview.md"
+          }
+        }
       ],
       "reference_answer": "store: 分库分表 | cache: 多级缓存",
-      "gold_docs": ["modules/store/overview.md", "modules/cache/overview.md"]
+      "gold_docs": [
+        "modules/store/overview.md",
+        "modules/cache/overview.md"
+      ]
     },
     {
       "id": "hard_retrieval_004",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 9,
@@ -150,36 +293,81 @@
         "docs/overview.md": "概览，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 v3 下 2 份，覆盖率=1；v1/v2/docs 为噪声（版本混淆）",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "v3/ops.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "v1/deploy.md", "value": "v1 deploy: 物理机"}},
-          {"fn": "file_not_exists", "args": {"path": "v3/_scratch.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "v1/deploy.md",
+              "value": "v1 deploy: 物理机"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "v3/_scratch.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "version_confusion"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "version_confusion"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "v3"}},
-        {"tool": "read", "args": {"path": "v3/deploy.md"}},
-        {"tool": "read", "args": {"path": "v3/ops.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "v3"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "v3/deploy.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "v3/ops.md"
+          }
+        }
       ],
       "reference_answer": "v3 deploy: k8s | v3 ops: 监控",
-      "gold_docs": ["v3/deploy.md", "v3/ops.md"]
+      "gold_docs": [
+        "v3/deploy.md",
+        "v3/ops.md"
+      ]
     },
     {
       "id": "hard_retrieval_005",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 11,
@@ -193,36 +381,81 @@
         "timeline.md": "时间线，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 P0 两份，覆盖率=1；P1/postmortem/timeline 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "incident/inc_002.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "incident/inc_003.md", "value": "P1: 延迟升高"}},
-          {"fn": "file_not_exists", "args": {"path": "incident/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "incident/inc_003.md",
+              "value": "P1: 延迟升高"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "incident/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "incident"}},
-        {"tool": "read", "args": {"path": "incident/inc_001.md"}},
-        {"tool": "read", "args": {"path": "incident/inc_002.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "incident"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "incident/inc_001.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "incident/inc_002.md"
+          }
+        }
       ],
       "reference_answer": "P0: 支付中断 | P0: 缓存雪崩",
-      "gold_docs": ["incident/inc_001.md", "incident/inc_002.md"]
+      "gold_docs": [
+        "incident/inc_001.md",
+        "incident/inc_002.md"
+      ]
     },
     {
       "id": "hard_retrieval_006",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 10,
@@ -236,36 +469,81 @@
         "ccpa/draft/next.md": "草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 GDPR 正式 2 份，覆盖率=1；draft/ 与 ccpa/ 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "gdpr/terms.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "ccpa/main.md", "value": "ccpa: 退出权"}},
-          {"fn": "file_not_exists", "args": {"path": "gdpr/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "ccpa/main.md",
+              "value": "ccpa: 退出权"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "gdpr/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "gdpr"}},
-        {"tool": "read", "args": {"path": "gdpr/main.md"}},
-        {"tool": "read", "args": {"path": "gdpr/terms.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "gdpr"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "gdpr/main.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "gdpr/terms.md"
+          }
+        }
       ],
       "reference_answer": "gdpr: 数据主体权利 | gdpr: 处理条款",
-      "gold_docs": ["gdpr/main.md", "gdpr/terms.md"]
+      "gold_docs": [
+        "gdpr/main.md",
+        "gdpr/terms.md"
+      ]
     },
     {
       "id": "hard_retrieval_007",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 12,
@@ -280,38 +558,95 @@
         "services/order/CHANGELOG.md": "变更，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 4 个活跃服务 README，覆盖率=1；legacy/CHANGELOG 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "services/pay/README.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "services/svc_legacy/README.md", "value": "废弃，忽略"}},
-          {"fn": "file_not_exists", "args": {"path": "services/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "services/svc_legacy/README.md",
+              "value": "废弃，忽略"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "services/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "services"}},
-        {"tool": "read", "args": {"path": "services/order/README.md"}},
-        {"tool": "read", "args": {"path": "services/user/README.md"}},
-        {"tool": "read", "args": {"path": "services/pay/README.md"}},
-        {"tool": "read", "args": {"path": "services/notify/README.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "services"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "services/order/README.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "services/user/README.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "services/pay/README.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "services/notify/README.md"
+          }
+        }
       ],
       "reference_answer": "order: 下单 | user: 账户 | pay: 收单 | notify: 通知",
-      "gold_docs": ["services/order/README.md", "services/user/README.md", "services/pay/README.md", "services/notify/README.md"]
+      "gold_docs": [
+        "services/order/README.md",
+        "services/user/README.md",
+        "services/pay/README.md",
+        "services/notify/README.md"
+      ]
     },
     {
       "id": "hard_retrieval_008",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 11,
@@ -325,37 +660,88 @@
         "algo/sort/_notes.md": "笔记，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 sort 类 3 份，覆盖率=1；graph/notes 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "algo/sort/heap.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "algo/graph/bfs.md", "value": "bfs: 层序"}},
-          {"fn": "file_not_exists", "args": {"path": "algo/sort/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "algo/graph/bfs.md",
+              "value": "bfs: 层序"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "algo/sort/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "algo/sort"}},
-        {"tool": "read", "args": {"path": "algo/sort/quick.md"}},
-        {"tool": "read", "args": {"path": "algo/sort/merge.md"}},
-        {"tool": "read", "args": {"path": "algo/sort/heap.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "algo/sort"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "algo/sort/quick.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "algo/sort/merge.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "algo/sort/heap.md"
+          }
+        }
       ],
       "reference_answer": "quick: 平均 O(nlogn) | merge: 稳定 | heap: 原地",
-      "gold_docs": ["algo/sort/quick.md", "algo/sort/merge.md", "algo/sort/heap.md"]
+      "gold_docs": [
+        "algo/sort/quick.md",
+        "algo/sort/merge.md",
+        "algo/sort/heap.md"
+      ]
     },
     {
       "id": "hard_retrieval_009",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 10,
@@ -368,36 +754,81 @@
         "templates/archived/client_a_contract.md": "旧版，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 active 下 2 份生效合同，覆盖率=1；draft/archived 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "templates/active/client_b_contract.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "templates/archived/client_a_contract.md", "value": "旧版，忽略"}},
-          {"fn": "file_not_exists", "args": {"path": "templates/active/_tmp.md"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "templates/archived/client_a_contract.md",
+              "value": "旧版，忽略"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "templates/active/_tmp.md"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "templates/active"}},
-        {"tool": "read", "args": {"path": "templates/active/client_a_contract.md"}},
-        {"tool": "read", "args": {"path": "templates/active/client_b_contract.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "templates/active"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "templates/active/client_a_contract.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "templates/active/client_b_contract.md"
+          }
+        }
       ],
       "reference_answer": "a: 年框 | b: 项目制",
-      "gold_docs": ["templates/active/client_a_contract.md", "templates/active/client_b_contract.md"]
+      "gold_docs": [
+        "templates/active/client_a_contract.md",
+        "templates/active/client_b_contract.md"
+      ]
     },
     {
       "id": "hard_retrieval_010",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "hard",
       "difficulty": "hard",
       "steps": 12,
@@ -410,31 +841,75 @@
         "dashboards/_tmp/draft.json": "草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读取 prod 下 2 份核心面板，覆盖率=1；staging/_tmp 为噪声（同名混淆）",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "dashboards/prod/error_rate.json"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "dashboards/staging/latency.json", "value": "staging，忽略"}},
-          {"fn": "file_not_exists", "args": {"path": "dashboards/prod/_scratch.json"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "dashboards/staging/latency.json",
+              "value": "staging，忽略"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "dashboards/prod/_scratch.json"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "selective", "same_name", "noise"],
+      "tags": [
+        "retrieval",
+        "selective",
+        "same_name",
+        "noise"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "dashboards/prod"}},
-        {"tool": "read", "args": {"path": "dashboards/prod/latency.json"}},
-        {"tool": "read", "args": {"path": "dashboards/prod/error_rate.json"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "dashboards/prod"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "dashboards/prod/latency.json"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "dashboards/prod/error_rate.json"
+          }
+        }
       ],
       "reference_answer": "latency: p99 | error_rate: 5xx",
-      "gold_docs": ["dashboards/prod/latency.json", "dashboards/prod/error_rate.json"]
+      "gold_docs": [
+        "dashboards/prod/latency.json",
+        "dashboards/prod/error_rate.json"
+      ]
     }
   ]
 }

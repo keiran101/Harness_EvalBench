@@ -4,7 +4,9 @@
     {
       "id": "base_retrieval_001",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 3,
@@ -16,35 +18,73 @@
         "docs/c.txt": "C: 数据保留 30 天"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 3 个文档并汇报",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "docs/a.txt"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "docs/c.txt", "value": "C: 数据保留 30 天"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "docs/c.txt",
+              "value": "C: 数据保留 30 天"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "docs/a.txt"}},
-        {"tool": "read", "args": {"path": "docs/b.txt"}},
-        {"tool": "read", "args": {"path": "docs/c.txt"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/a.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/b.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/c.txt"
+          }
+        }
       ],
       "reference_answer": "A: 认证走 OAuth2 | B: 限流 100 QPS | C: 数据保留 30 天",
-      "gold_docs": ["docs/a.txt", "docs/b.txt", "docs/c.txt"]
+      "gold_docs": [
+        "docs/a.txt",
+        "docs/b.txt",
+        "docs/c.txt"
+      ]
     },
     {
       "id": "base_retrieval_002",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 2,
@@ -56,34 +96,66 @@
         "notes.txt": "临时草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读 changelog.md + readme.md，覆盖率=1；只读其一=0.5",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "changelog.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "notes.txt", "value": "临时草稿，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "notes.txt",
+              "value": "临时草稿，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "distractor"],
+      "tags": [
+        "retrieval",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "changelog.md"}},
-        {"tool": "read", "args": {"path": "readme.md"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "changelog.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "readme.md"
+          }
+        }
       ],
       "reference_answer": "v2: 新增检索指标 | 用法见 docs",
-      "gold_docs": ["changelog.md", "readme.md"]
+      "gold_docs": [
+        "changelog.md",
+        "readme.md"
+      ]
     },
     {
       "id": "base_retrieval_003",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 4,
@@ -95,35 +167,73 @@
         "products.txt": "products: 88 条"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 3 个文件，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "orders.txt"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "products.txt", "value": "products: 88 条"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "products.txt",
+              "value": "products: 88 条"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "users.txt"}},
-        {"tool": "read", "args": {"path": "orders.txt"}},
-        {"tool": "read", "args": {"path": "products.txt"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "users.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "orders.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "products.txt"
+          }
+        }
       ],
       "reference_answer": "users: 120 条 | orders: 530 条 | products: 88 条",
-      "gold_docs": ["users.txt", "orders.txt", "products.txt"]
+      "gold_docs": [
+        "users.txt",
+        "orders.txt",
+        "products.txt"
+      ]
     },
     {
       "id": "base_retrieval_004",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 3,
@@ -135,34 +245,66 @@
         "legacy.md": "旧接口，已废弃"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读 api.md + api_v2.md，覆盖率=1；读 legacy.md 不加分",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "api_v2.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "legacy.md", "value": "旧接口，已废弃"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "legacy.md",
+              "value": "旧接口，已废弃"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "distractor"],
+      "tags": [
+        "retrieval",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "api.md"}},
-        {"tool": "read", "args": {"path": "api_v2.md"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "api.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "api_v2.md"
+          }
+        }
       ],
       "reference_answer": "api: REST 同步 | api_v2: GraphQL 异步",
-      "gold_docs": ["api.md", "api_v2.md"]
+      "gold_docs": [
+        "api.md",
+        "api_v2.md"
+      ]
     },
     {
       "id": "base_retrieval_005",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 2,
@@ -173,34 +315,66 @@
         "secrets.yml": "token: abc123"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 2 个文件，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "secrets.yml"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "config.yml", "value": "port: 9000"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "config.yml",
+              "value": "port: 9000"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "config.yml"}},
-        {"tool": "read", "args": {"path": "secrets.yml"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "config.yml"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "secrets.yml"
+          }
+        }
       ],
       "reference_answer": "port: 9000 | token: abc123",
-      "gold_docs": ["config.yml", "secrets.yml"]
+      "gold_docs": [
+        "config.yml",
+        "secrets.yml"
+      ]
     },
     {
       "id": "base_retrieval_006",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 3,
@@ -212,35 +386,73 @@
         "policies/p3.txt": "p3: 审计留痕"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 policies/ 下 3 份，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "policies/p2.txt"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "policies/p3.txt", "value": "p3: 审计留痕"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "policies/p3.txt",
+              "value": "p3: 审计留痕"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "policies/p1.txt"}},
-        {"tool": "read", "args": {"path": "policies/p2.txt"}},
-        {"tool": "read", "args": {"path": "policies/p3.txt"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "policies/p1.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "policies/p2.txt"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "policies/p3.txt"
+          }
+        }
       ],
       "reference_answer": "p1: 最小权限 | p2: 双人复核 | p3: 审计留痕",
-      "gold_docs": ["policies/p1.txt", "policies/p2.txt", "policies/p3.txt"]
+      "gold_docs": [
+        "policies/p1.txt",
+        "policies/p2.txt",
+        "policies/p3.txt"
+      ]
     },
     {
       "id": "base_retrieval_007",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 4,
@@ -253,36 +465,80 @@
         "d.log": "d: OK"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 4 份日志，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "c.log"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "d.log", "value": "d: OK"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "d.log",
+              "value": "d: OK"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "a.log"}},
-        {"tool": "read", "args": {"path": "b.log"}},
-        {"tool": "read", "args": {"path": "c.log"}},
-        {"tool": "read", "args": {"path": "d.log"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "a.log"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "b.log"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "c.log"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "d.log"
+          }
+        }
       ],
       "reference_answer": "a: OK | b: WARN | c: ERROR | d: OK",
-      "gold_docs": ["a.log", "b.log", "c.log", "d.log"]
+      "gold_docs": [
+        "a.log",
+        "b.log",
+        "c.log",
+        "d.log"
+      ]
     },
     {
       "id": "base_retrieval_008",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 2,
@@ -294,34 +550,66 @@
         "build/bundle.js": "编译产物，忽略"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读 index.html + style.css，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "style.css"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "build/bundle.js", "value": "编译产物，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "build/bundle.js",
+              "value": "编译产物，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "distractor"],
+      "tags": [
+        "retrieval",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "index.html"}},
-        {"tool": "read", "args": {"path": "style.css"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "index.html"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "style.css"
+          }
+        }
       ],
       "reference_answer": "title: Demo | color: #09f",
-      "gold_docs": ["index.html", "style.css"]
+      "gold_docs": [
+        "index.html",
+        "style.css"
+      ]
     },
     {
       "id": "base_retrieval_009",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 3,
@@ -333,35 +621,73 @@
         "CONTRIBUTING": "贡献指南"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 3 份，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "LICENSE"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "CONTRIBUTING", "value": "贡献指南"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "CONTRIBUTING",
+              "value": "贡献指南"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "README"}},
-        {"tool": "read", "args": {"path": "LICENSE"}},
-        {"tool": "read", "args": {"path": "CONTRIBUTING"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "README"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "LICENSE"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "CONTRIBUTING"
+          }
+        }
       ],
       "reference_answer": "项目说明 | MIT | 贡献指南",
-      "gold_docs": ["README", "LICENSE", "CONTRIBUTING"]
+      "gold_docs": [
+        "README",
+        "LICENSE",
+        "CONTRIBUTING"
+      ]
     },
     {
       "id": "base_retrieval_010",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "base",
       "difficulty": "easy",
       "steps": 2,
@@ -372,29 +698,59 @@
         "seed.sql": "rows: 50"
       },
       "params": [],
-      "available_tools": ["read"],
+      "available_tools": [
+        "read"
+      ],
       "expected_outcome": "读全 2 份，覆盖率=1",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "schema.sql"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "seed.sql", "value": "rows: 50"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "seed.sql",
+              "value": "rows: 50"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "read_all"],
+      "tags": [
+        "retrieval",
+        "read_all"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "read", "args": {"path": "schema.sql"}},
-        {"tool": "read", "args": {"path": "seed.sql"}}
+        {
+          "tool": "read",
+          "args": {
+            "path": "schema.sql"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "seed.sql"
+          }
+        }
       ],
       "reference_answer": "tables: 5 | rows: 50",
-      "gold_docs": ["schema.sql", "seed.sql"]
+      "gold_docs": [
+        "schema.sql",
+        "seed.sql"
+      ]
     }
   ]
 }

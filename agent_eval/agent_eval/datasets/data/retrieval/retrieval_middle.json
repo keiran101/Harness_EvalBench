@@ -4,7 +4,9 @@
     {
       "id": "middle_retrieval_001",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -18,37 +20,88 @@
         "logs/run.log": "运行日志，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 3 个配置文件（config/app.conf、config/db.conf、settings.yaml），覆盖率=1；tmp/ 与 logs/ 为干扰项不应读",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "config/db.conf"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_not_exists", "args": {"path": "tmp/modified.tmp"}},
-          {"fn": "file_content_eq", "args": {"path": "logs/run.log", "value": "运行日志，忽略"}}
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "tmp/modified.tmp"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "logs/run.log",
+              "value": "运行日志，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "."}},
-        {"tool": "read", "args": {"path": "config/app.conf"}},
-        {"tool": "read", "args": {"path": "config/db.conf"}},
-        {"tool": "read", "args": {"path": "settings.yaml"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "."
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "config/app.conf"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "config/db.conf"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "settings.yaml"
+          }
+        }
       ],
       "reference_answer": "app.conf: 监听端口 8080 | db.conf: 连接池 20 | settings: 时区 Asia/Shanghai",
-      "gold_docs": ["config/app.conf", "config/db.conf", "settings.yaml"]
+      "gold_docs": [
+        "config/app.conf",
+        "config/db.conf",
+        "settings.yaml"
+      ]
     },
     {
       "id": "middle_retrieval_002",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 6,
@@ -62,37 +115,88 @@
         "tests/test_order.py": "测试，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 src/ 下 3 个，覆盖率=1；tests/ 为干扰项",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "src/pay.py"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_not_exists", "args": {"path": "src/_scratch.py"}},
-          {"fn": "file_content_eq", "args": {"path": "tests/test_user.py", "value": "测试，忽略"}}
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "src/_scratch.py"
+            }
+          },
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "tests/test_user.py",
+              "value": "测试，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "src"}},
-        {"tool": "read", "args": {"path": "src/user.py"}},
-        {"tool": "read", "args": {"path": "src/order.py"}},
-        {"tool": "read", "args": {"path": "src/pay.py"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "src"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "src/user.py"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "src/order.py"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "src/pay.py"
+          }
+        }
       ],
       "reference_answer": "user: 用户模型 | order: 订单模型 | pay: 支付逻辑",
-      "gold_docs": ["src/user.py", "src/order.py", "src/pay.py"]
+      "gold_docs": [
+        "src/user.py",
+        "src/order.py",
+        "src/pay.py"
+      ]
     },
     {
       "id": "middle_retrieval_003",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -106,37 +210,89 @@
         "docs/draft/old.md": "旧草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 4 份正式文档，覆盖率=1；draft/ 为干扰项",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "docs/guide/tuning.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "docs/draft/old.md", "value": "旧草稿，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "docs/draft/old.md",
+              "value": "旧草稿，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "docs"}},
-        {"tool": "read", "args": {"path": "docs/intro.md"}},
-        {"tool": "read", "args": {"path": "docs/quickstart.md"}},
-        {"tool": "read", "args": {"path": "docs/guide/install.md"}},
-        {"tool": "read", "args": {"path": "docs/guide/tuning.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "docs"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/intro.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/quickstart.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/guide/install.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "docs/guide/tuning.md"
+          }
+        }
       ],
       "reference_answer": "intro: 概述 | quickstart: 快速开始 | install: 安装 | tuning: 调优",
-      "gold_docs": ["docs/intro.md", "docs/quickstart.md", "docs/guide/install.md", "docs/guide/tuning.md"]
+      "gold_docs": [
+        "docs/intro.md",
+        "docs/quickstart.md",
+        "docs/guide/install.md",
+        "docs/guide/tuning.md"
+      ]
     },
     {
       "id": "middle_retrieval_004",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -149,36 +305,82 @@
         "migrations/tmp/scratch.sql": "草稿，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 3 个正式迁移，覆盖率=1；tmp/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "migrations/002_add_idx.sql"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "migrations/tmp/scratch.sql", "value": "草稿，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "migrations/tmp/scratch.sql",
+              "value": "草稿，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "migrations"}},
-        {"tool": "read", "args": {"path": "migrations/001_init.sql"}},
-        {"tool": "read", "args": {"path": "migrations/002_add_idx.sql"}},
-        {"tool": "read", "args": {"path": "migrations/003_arch.sql"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "migrations"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/001_init.sql"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/002_add_idx.sql"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/003_arch.sql"
+          }
+        }
       ],
       "reference_answer": "v1: 建表 | v2: 加索引 | v3: 归档",
-      "gold_docs": ["migrations/001_init.sql", "migrations/002_add_idx.sql", "migrations/003_arch.sql"]
+      "gold_docs": [
+        "migrations/001_init.sql",
+        "migrations/002_add_idx.sql",
+        "migrations/003_arch.sql"
+      ]
     },
     {
       "id": "middle_retrieval_005",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 6,
@@ -192,37 +394,89 @@
         "deploy/cache/snapshot.yaml": "缓存快照，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 4 个正式配置，覆盖率=1；cache/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "deploy/overrides/mq.yaml"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "deploy/cache/snapshot.yaml", "value": "缓存快照，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "deploy/cache/snapshot.yaml",
+              "value": "缓存快照，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "deploy"}},
-        {"tool": "read", "args": {"path": "deploy/base.yaml"}},
-        {"tool": "read", "args": {"path": "deploy/prod.yaml"}},
-        {"tool": "read", "args": {"path": "deploy/overrides/redis.yaml"}},
-        {"tool": "read", "args": {"path": "deploy/overrides/mq.yaml"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "deploy"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "deploy/base.yaml"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "deploy/prod.yaml"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "deploy/overrides/redis.yaml"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "deploy/overrides/mq.yaml"
+          }
+        }
       ],
       "reference_answer": "base: 2 副本 | prod: 5 副本 | redis: 开启 | mq: 关闭",
-      "gold_docs": ["deploy/base.yaml", "deploy/prod.yaml", "deploy/overrides/redis.yaml", "deploy/overrides/mq.yaml"]
+      "gold_docs": [
+        "deploy/base.yaml",
+        "deploy/prod.yaml",
+        "deploy/overrides/redis.yaml",
+        "deploy/overrides/mq.yaml"
+      ]
     },
     {
       "id": "middle_retrieval_006",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -234,35 +488,75 @@
         "sub/tmp/notes.md": "临时，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 2 份 report.md（不同路径），覆盖率=1；tmp/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "sub/report.md"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "sub/tmp/notes.md", "value": "临时，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "sub/tmp/notes.md",
+              "value": "临时，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "same_name"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "same_name"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "."}},
-        {"tool": "read", "args": {"path": "report.md"}},
-        {"tool": "read", "args": {"path": "sub/report.md"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "."
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "report.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "sub/report.md"
+          }
+        }
       ],
       "reference_answer": "root report: 全局概览 | sub report: 子模块明细",
-      "gold_docs": ["report.md", "sub/report.md"]
+      "gold_docs": [
+        "report.md",
+        "sub/report.md"
+      ]
     },
     {
       "id": "middle_retrieval_007",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 6,
@@ -275,36 +569,82 @@
         "plugins/_disabled/d/manifest.json": "已禁用，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 3 个启用插件 manifest，覆盖率=1；_disabled/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "plugins/b/manifest.json"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "plugins/_disabled/d/manifest.json", "value": "已禁用，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "plugins/_disabled/d/manifest.json",
+              "value": "已禁用，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "plugins"}},
-        {"tool": "read", "args": {"path": "plugins/a/manifest.json"}},
-        {"tool": "read", "args": {"path": "plugins/b/manifest.json"}},
-        {"tool": "read", "args": {"path": "plugins/c/manifest.json"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "plugins"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "plugins/a/manifest.json"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "plugins/b/manifest.json"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "plugins/c/manifest.json"
+          }
+        }
       ],
       "reference_answer": "plugin: A | plugin: B | plugin: C",
-      "gold_docs": ["plugins/a/manifest.json", "plugins/b/manifest.json", "plugins/c/manifest.json"]
+      "gold_docs": [
+        "plugins/a/manifest.json",
+        "plugins/b/manifest.json",
+        "plugins/c/manifest.json"
+      ]
     },
     {
       "id": "middle_retrieval_008",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -316,35 +656,75 @@
         "locales/_legacy/messages.json": "旧版，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 en/zh 两份，覆盖率=1；_legacy/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "locales/zh/messages.json"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "locales/_legacy/messages.json", "value": "旧版，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "locales/_legacy/messages.json",
+              "value": "旧版，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "locales"}},
-        {"tool": "read", "args": {"path": "locales/en/messages.json"}},
-        {"tool": "read", "args": {"path": "locales/zh/messages.json"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "locales"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "locales/en/messages.json"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "locales/zh/messages.json"
+          }
+        }
       ],
       "reference_answer": "en: hello | zh: 你好",
-      "gold_docs": ["locales/en/messages.json", "locales/zh/messages.json"]
+      "gold_docs": [
+        "locales/en/messages.json",
+        "locales/zh/messages.json"
+      ]
     },
     {
       "id": "middle_retrieval_009",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 6,
@@ -358,37 +738,89 @@
         "rules/disabled/old.rule": "旧规则，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 4 个正式规则，覆盖率=1；disabled/ 干扰",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "rules/alerts/net.rule"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "rules/disabled/old.rule", "value": "旧规则，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "rules/disabled/old.rule",
+              "value": "旧规则，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "distractor"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "rules"}},
-        {"tool": "read", "args": {"path": "rules/cpu.rule"}},
-        {"tool": "read", "args": {"path": "rules/mem.rule"}},
-        {"tool": "read", "args": {"path": "rules/alerts/disk.rule"}},
-        {"tool": "read", "args": {"path": "rules/alerts/net.rule"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "rules"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "rules/cpu.rule"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "rules/mem.rule"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "rules/alerts/disk.rule"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "rules/alerts/net.rule"
+          }
+        }
       ],
       "reference_answer": "cpu>90% | mem>85% | disk>95% | net>1G",
-      "gold_docs": ["rules/cpu.rule", "rules/mem.rule", "rules/alerts/disk.rule", "rules/alerts/net.rule"]
+      "gold_docs": [
+        "rules/cpu.rule",
+        "rules/mem.rule",
+        "rules/alerts/disk.rule",
+        "rules/alerts/net.rule"
+      ]
     },
     {
       "id": "middle_retrieval_010",
       "domain": "retrieval",
-      "capability": ["retrieval"],
+      "capability": [
+        "retrieval"
+      ],
       "tier": "middle",
       "difficulty": "medium",
       "steps": 5,
@@ -401,30 +833,68 @@
         "themes/_beta/light.css": "实验，忽略"
       },
       "params": [],
-      "available_tools": ["read", "ls", "find"],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
       "expected_outcome": "读全 default 主题 2 份配色，覆盖率=1；alt/_beta 为干扰（非 default）",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
         "fail_to_pass": [
-          {"fn": "reported_file_value", "args": {"path": "themes/default/dark.css"}}
+          {
+            "fn": "retrieval_covered"
+          }
         ],
         "pass_to_pass": [
-          {"fn": "file_content_eq", "args": {"path": "themes/_beta/light.css", "value": "实验，忽略"}}
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "themes/_beta/light.css",
+              "value": "实验，忽略"
+            }
+          }
         ]
       },
-      "grader": {"type": "rule"},
+      "grader": {
+        "type": "rule"
+      },
       "leak_guard": {},
-      "tags": ["retrieval", "nested_dir", "selective"],
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "selective"
+      ],
       "expectation": "",
-      "env": {"backend": "disk"},
+      "env": {
+        "backend": "disk"
+      },
       "reference_plan": [
-        {"tool": "ls", "args": {"path": "themes"}},
-        {"tool": "read", "args": {"path": "themes/default/light.css"}},
-        {"tool": "read", "args": {"path": "themes/default/dark.css"}}
+        {
+          "tool": "ls",
+          "args": {
+            "path": "themes"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "themes/default/light.css"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "themes/default/dark.css"
+          }
+        }
       ],
       "reference_answer": "default-light: #fff | default-dark: #000",
-      "gold_docs": ["themes/default/light.css", "themes/default/dark.css"]
+      "gold_docs": [
+        "themes/default/light.css",
+        "themes/default/dark.css"
+      ]
     }
   ]
 }

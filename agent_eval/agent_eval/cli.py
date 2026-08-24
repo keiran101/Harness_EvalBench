@@ -39,6 +39,16 @@ DEFAULT_DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 # Git root (D:\dev\eval): the generated eval_*.json outputs must land here, NOT
 # inside the package dir, so they stay out of `git add agent_eval/`.
 GIT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# All evaluation artifacts land in <GIT_ROOT>/results/ by default (timestamped,
+# never overwritten). Use --output to override.
+RESULTS_DIR = os.path.join(GIT_ROOT, "results")
+
+
+def _default_out(name_stem: str) -> str:
+    """Default output path under results/, timestamped to avoid overwriting."""
+    from datetime import datetime
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return os.path.join(RESULTS_DIR, f"{name_stem}_{ts}.json")
 
 
 def _wilson_ci(p: float, n: int, z: float = 1.96) -> List[float]:
@@ -71,8 +81,7 @@ def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optiona
     if agent == "mock":
         a = UnifiedMockAgent()
         scope = [t.id for t in reg.list_templates()]          # mock runs every domain
-        default_out = os.path.join(GIT_ROOT,
-                                   "eval_unified_output.json")
+        default_out = _default_out("eval_mock_" + "_".join(datasets))
     elif agent == "llm":
         from .llm_agent import LLMToolAgent
         a = LLMToolAgent()
@@ -80,28 +89,23 @@ def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optiona
         # templates flow through it (mirror of the pi branch filtering disk-only).
         scope = [t.id for t in reg.list_templates()
                  if (t.env or {}).get("backend", "memory") == "memory"]
-        default_out = os.path.join(GIT_ROOT,
-                                   "eval_llm_cli_output.json")
+        default_out = _default_out("eval_llm_" + "_".join(datasets))
     elif agent == "pi":
         from .pi_adapter import PiAgentAdapter
         a = PiAgentAdapter(strategy=strategy, mode=mode)
         # pi is a coding agent -> only disk-backed templates flow through it
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
-        default_out = os.path.join(GIT_ROOT,
-                                   "eval_pi_unified_output.json" if mode == "plan"
-                                   else "eval_pi_llm_output.json")
+        default_out = _default_out("eval_pi_" + mode + "_" + "_".join(datasets))
     elif agent == "opencode":
         from .opencode_adapter import OpenCodeAgentAdapter
         a = OpenCodeAgentAdapter()
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
-        default_out = os.path.join(GIT_ROOT,
-                                   "eval_opencode_coding_llm.json")
+        default_out = _default_out("eval_opencode_" + "_".join(datasets))
     elif agent == "deepseek":
         from .deepseek_adapter import DeepSeekHarnessAdapter
         a = DeepSeekHarnessAdapter()
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
-        default_out = os.path.join(GIT_ROOT,
-                                   "eval_deepseek_coding_llm.json")
+        default_out = _default_out("eval_deepseek_" + "_".join(datasets))
     else:
         raise ValueError(f"unknown agent: {agent!r} (use 'mock', 'llm', 'pi', 'opencode' or 'deepseek')")
 

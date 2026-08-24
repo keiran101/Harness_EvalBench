@@ -65,3 +65,30 @@ class EvalReport:
     first_error_step: Optional[int]
     metrics: dict = field(default_factory=dict)
     notes: str = ""
+    # Full trajectory for this case (action/observation/answer/latency), kept so the
+    # report is auditable. Adapters discard raw sessions after parsing; this is the
+    # structured residue we retain for replay/attribution.
+    traj: Optional["Trajectory"] = None
+
+
+def _traj_to_dict(traj) -> dict:
+    """Serialize a Trajectory into a JSON-friendly dict (steps + answer + timing)."""
+    if traj is None:
+        return {}
+    return {
+        "answer": traj.answer,
+        "latency_ms": traj.latency_ms,
+        "request_count": traj.request_count,
+        "steps": [
+            {
+                "action": s.action,
+                "observation": s.observation,
+                "is_error": s.is_error,
+                "error_category": s.error_category,
+                "answer": s.answer,
+                "state_before": s.state_before,
+                "state_after": s.state_after,
+            }
+            for s in traj.steps
+        ],
+    }

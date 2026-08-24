@@ -10,7 +10,7 @@ from __future__ import annotations
 from time import perf_counter
 from typing import Callable, Dict, List, Optional
 
-from .core import EvalReport, first_error_step
+from .core import EvalReport, first_error_step, _traj_to_dict
 from .datasets.registry import DatasetRegistry
 from .environments.env import Env
 from .judge.judge import DummyJudge, Judge
@@ -82,6 +82,7 @@ class Evaluator:
                 passed=vr.passed,
                 first_error_step=fe,
                 metrics=metrics,
+                traj=traj,
             ))
             env.cleanup()
         return reports
@@ -106,6 +107,8 @@ class Evaluator:
                 "first_error_steps": [r.first_error_step for r in reps
                                       if r.first_error_step is not None],
                 "robustness": robustness(successes, self.k, t.capability),
+                # Full per-seed trajectories for audit/replay.
+                "trajectories": [_traj_to_dict(r.traj) for r in reps],
             }
             all_reports.extend(reps)
 
