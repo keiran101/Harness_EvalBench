@@ -23,3 +23,6 @@ papers/*.pdf
 
 # WorkBuddy workspace memory
 .workbuddy/
+
+# Docs (local only, not synced to GitHub)
+docs/
