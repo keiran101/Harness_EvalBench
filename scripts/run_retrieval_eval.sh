@@ -6,8 +6,9 @@
 # 用法：
 #   bash scripts/run_retrieval_eval.sh
 #
-# 产物：每个 agent 跑完自动落 D:\dev\eval\results\eval_<agent>_retrieval_<时间戳>.json
-#       （cli.py 已改为默认落 results/ 且带时间戳，无需手动指定 --output）
+# 产物：每个 agent 跑完自动落 D:\dev\eval\results\eval_<agent>_retrieval_keycases_<时间戳>.json
+#       （--datasets retrieval,keycases,keycases 将两池合并为单次运行，同一 agent 只产出一个 result json）
+#       cli.py 已改为默认落 results/ 且带时间戳，无需手动指定 --output
 # =============================================================================
 
 set -e   # 任一 agent 非零退出即中止，避免带着失败继续跑下一个
@@ -23,19 +24,19 @@ echo "=================================================="
 echo "[$(date +%H:%M:%S)] 开始检索域串行评估 (deepseek -> pi -> opencode)"
 echo "=================================================="
 
-# 1) deepseek（约 40s/次 × k2 × 30 模板 ≈ 40min）
+# 1) deepseek（约 40s/次 × k2 × 33 模板(30 retrieval+3 keycases) ≈ 44min）
 echo "[$(date +%H:%M:%S)] >>> 1/3 deepseek 启动"
-python -m agent_eval --agent deepseek --datasets retrieval --k 2
+python -m agent_eval --agent deepseek --datasets retrieval,keycases --k 2
 echo "[$(date +%H:%M:%S)] <<< deepseek 完成"
 
-# 2) pi（--mode llm 真实 LLM 决策，约 19s+/次 × 60 ≈ 20min）
+# 2) pi（--mode llm 真实 LLM 决策，约 19s+/次 × 66 ≈ 21min）
 echo "[$(date +%H:%M:%S)] >>> 2/3 pi 启动"
-python -m agent_eval --agent pi --mode llm --datasets retrieval --k 2
+python -m agent_eval --agent pi --mode llm --datasets retrieval,keycases --k 2
 echo "[$(date +%H:%M:%S)] <<< pi 完成"
 
-# 3) opencode（最重，每次起 bun 跑真实 CLI，约 57s/次 × 60 ≈ 57min）
+# 3) opencode（最重，每次起 bun 跑真实 CLI，约 57s/次 × 66 ≈ 63min）
 echo "[$(date +%H:%M:%S)] >>> 3/3 opencode 启动"
-python -m agent_eval --agent opencode --datasets retrieval --k 2
+python -m agent_eval --agent opencode --datasets retrieval,keycases --k 2
 echo "[$(date +%H:%M:%S)] <<< opencode 完成"
 
 echo "=================================================="

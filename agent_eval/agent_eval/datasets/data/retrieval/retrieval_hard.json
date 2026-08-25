@@ -746,7 +746,7 @@
       "difficulty": "hard",
       "steps": 10,
       "tools": 3,
-      "instruction": "合同模板仓库 templates/ 下每个客户一份，但只有 active/ 子目录是当前生效的。请提取 active/ 下 client_a 与 client_b 的合同（合同名含 contract）；archived/ 与 active/client_c 草稿忽略",
+      "instruction": "合同模板仓库 templates/ 下每个客户一份，但只有 active/ 子目录是当前生效的。请用 read 工具读取 active/ 下 client_a 与 client_b 的合同（文件名含 contract）内容并汇报；archived/ 与 active/client_c 草稿忽略",
       "setup": {
         "templates/active/client_a_contract.md": "a: 年框",
         "templates/active/client_b_contract.md": "b: 项目制",

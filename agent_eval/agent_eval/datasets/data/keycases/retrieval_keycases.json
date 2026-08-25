@@ -184,6 +184,93 @@
         "migrations/002_add_idx.sql",
         "migrations/003_arch.sql"
       ]
+    },
+    {
+      "id": "keycases_hard_009",
+      "domain": "retrieval",
+      "capability": [
+        "retrieval"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 10,
+      "tools": 3,
+      "instruction": "合同模板仓库 templates/ 下每个客户一份，但只有 active/ 子目录是当前生效的。请提取 active/ 下 client_a 与 client_b 的合同（合同名含 contract）；archived/ 与 active/client_c 草稿忽略",
+      "setup": {
+        "templates/active/client_a_contract.md": "a: 年框",
+        "templates/active/client_b_contract.md": "b: 项目制",
+        "templates/active/client_c_draft.md": "草稿，忽略",
+        "templates/archived/client_a_contract.md": "旧版，忽略"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
+      "expected_outcome": "读取 active 下 2 份生效合同，覆盖率=1；draft/archived 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "retrieval_covered"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "templates/archived/client_a_contract.md",
+              "value": "旧版，忽略"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "templates/active/_tmp.md"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "ls",
+          "args": {
+            "path": "templates/active"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "templates/active/client_a_contract.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "templates/active/client_b_contract.md"
+          }
+        }
+      ],
+      "reference_answer": "a: 年框 | b: 项目制",
+      "gold_docs": [
+        "templates/active/client_a_contract.md",
+        "templates/active/client_b_contract.md"
+      ]
     }
   ],
   "field_annotations": {
@@ -203,6 +290,15 @@
       "verifier.pass_to_pass[file_content_eq]": "tmp/scratch.sql 内容未被改动",
       "reference_answer": "版本号可由文件名推——本集刻意保留，看 agent 是否读内容",
       "available_tools": "read/ls/find 分工"
+    },
+    "keycases_hard_009": {
+      "instruction": "诊断要点：原始指令用『提取』表述——agent 可把『提取合同』理解为『在回答中列出/归纳合同要点』而**不实际 read 文件**；verifier 用 retrieval_covered 强制读，于是『答案看起来对但没读』会被判挂。本集保留『提取』歧义原文，观测 agent 是否真 read 内容还是仅靠推理/列名。",
+      "gold_docs": "retrieval_covered 覆盖目标：templates/active/client_a_contract.md 与 client_b_contract.md 两份 active 生效合同",
+      "verifier.fail_to_pass[retrieval_covered]": "轨迹须用 read 覆盖 2 份 active 合同；不读则覆盖率<1 直接 fail（提取≠列名）",
+      "verifier.pass_to_pass[file_content_eq]": "回归保护：archived/client_a_contract.md（同名旧版）未被篡改",
+      "verifier.pass_to_pass[file_not_exists]": "副作用检查：active/ 下未产生额外文件(_tmp.md)",
+      "reference_answer": "『提取』可被弱模型当作『无需读』——本集刻意保留，看 agent 是否读内容",
+      "available_tools": "read/ls/find 分工：read 取内容，ls/find 仅定位；注意 archived/ 同名 client_a_contract.md 是目录敏感陷阱"
     }
   }
 }
