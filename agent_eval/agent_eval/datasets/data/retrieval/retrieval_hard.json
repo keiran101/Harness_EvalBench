@@ -100,11 +100,11 @@
       "difficulty": "hard",
       "steps": 9,
       "tools": 3,
-      "instruction": "仓库含支付（pay）与风控（risk）两大模块文档混放。请只提取支付模块的核心三份（pay_api.md、pay_callback.md、pay_refund.md）并汇报；risk/ 与 pay_draft/ 是噪声",
+      "instruction": "仓库含支付（pay）与风控（risk）两大模块文档混放。请只提取支付模块的核心三份并汇报各自关键要点；risk/ 与 pay_draft/ 是噪声",
       "setup": {
-        "pay_api.md": "pay_api: 下单接口",
-        "pay_callback.md": "pay_callback: 异步回调",
-        "pay_refund.md": "pay_refund: 退款流程",
+        "s1.md": "pay_api: 下单接口",
+        "s2.md": "pay_callback: 异步回调",
+        "s3.md": "pay_refund: 退款流程",
         "risk_rule.md": "risk: 黑名单",
         "risk_model.md": "risk: 评分卡",
         "pay_draft/v2.md": "草稿，忽略"
@@ -115,7 +115,7 @@
         "ls",
         "find"
       ],
-      "expected_outcome": "精准读取 3 份 pay 核心文档，覆盖率=1；risk/、pay_draft/ 为噪声",
+      "expected_outcome": "精准读取 3 份支付核心文档（s1/s2/s3），覆盖率=1；risk/、pay_draft/ 为噪声",
       "must_do": [],
       "must_not_do": [],
       "verifier": {
@@ -135,7 +135,7 @@
           {
             "fn": "file_not_exists",
             "args": {
-              "path": "pay/_tmp.md"
+              "path": "s_tmp.md"
             }
           }
         ]
@@ -163,27 +163,27 @@
         {
           "tool": "read",
           "args": {
-            "path": "pay_api.md"
+            "path": "s1.md"
           }
         },
         {
           "tool": "read",
           "args": {
-            "path": "pay_callback.md"
+            "path": "s2.md"
           }
         },
         {
           "tool": "read",
           "args": {
-            "path": "pay_refund.md"
+            "path": "s3.md"
           }
         }
       ],
       "reference_answer": "pay_api: 下单接口 | pay_callback: 异步回调 | pay_refund: 退款流程",
       "gold_docs": [
-        "pay_api.md",
-        "pay_callback.md",
-        "pay_refund.md"
+        "s1.md",
+        "s2.md",
+        "s3.md"
       ]
     },
     {

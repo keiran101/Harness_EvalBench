@@ -297,11 +297,11 @@
       "difficulty": "medium",
       "steps": 5,
       "tools": 3,
-      "instruction": "找出所有迁移脚本（migrations/ 下 .sql 文件）并汇报版本号；migrations/tmp/ 下是草稿不要读",
+      "instruction": "找出 migrations/ 下所有正式迁移脚本（.sql 文件）并汇报版本号；migrations/tmp/ 下是草稿不要读",
       "setup": {
-        "migrations/001_init.sql": "v1: 建表",
-        "migrations/002_add_idx.sql": "v2: 加索引",
-        "migrations/003_arch.sql": "v3: 归档",
+        "migrations/init.sql": "v1: 建表",
+        "migrations/add_idx.sql": "v2: 加索引",
+        "migrations/arch.sql": "v3: 归档",
         "migrations/tmp/scratch.sql": "草稿，忽略"
       },
       "params": [],
@@ -352,27 +352,27 @@
         {
           "tool": "read",
           "args": {
-            "path": "migrations/001_init.sql"
+            "path": "migrations/init.sql"
           }
         },
         {
           "tool": "read",
           "args": {
-            "path": "migrations/002_add_idx.sql"
+            "path": "migrations/add_idx.sql"
           }
         },
         {
           "tool": "read",
           "args": {
-            "path": "migrations/003_arch.sql"
+            "path": "migrations/arch.sql"
           }
         }
       ],
       "reference_answer": "v1: 建表 | v2: 加索引 | v3: 归档",
       "gold_docs": [
-        "migrations/001_init.sql",
-        "migrations/002_add_idx.sql",
-        "migrations/003_arch.sql"
+        "migrations/init.sql",
+        "migrations/add_idx.sql",
+        "migrations/arch.sql"
       ]
     },
     {

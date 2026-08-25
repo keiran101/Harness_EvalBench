@@ -1,0 +1,208 @@
+{
+  "group": "retrieval_keycases",
+  "templates": [
+    {
+      "id": "keycases_hard_002",
+      "domain": "retrieval",
+      "capability": [
+        "retrieval"
+      ],
+      "tier": "hard",
+      "difficulty": "hard",
+      "steps": 9,
+      "tools": 3,
+      "instruction": "仓库含支付（pay）与风控（risk）两大模块文档混放。请只提取支付模块的核心三份（pay_api.md、pay_callback.md、pay_refund.md）并汇报；risk/ 与 pay_draft/ 是噪声",
+      "setup": {
+        "pay_api.md": "pay_api: 下单接口",
+        "pay_callback.md": "pay_callback: 异步回调",
+        "pay_refund.md": "pay_refund: 退款流程",
+        "risk_rule.md": "risk: 黑名单",
+        "risk_model.md": "risk: 评分卡",
+        "pay_draft/v2.md": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
+      "expected_outcome": "精准读取 3 份 pay 核心文档，覆盖率=1；risk/、pay_draft/ 为噪声",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "retrieval_covered"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "risk_model.md",
+              "value": "risk: 评分卡"
+            }
+          },
+          {
+            "fn": "file_not_exists",
+            "args": {
+              "path": "pay/_tmp.md"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "retrieval",
+        "selective",
+        "noise"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "ls",
+          "args": {
+            "path": "."
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_api.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_callback.md"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "pay_refund.md"
+          }
+        }
+      ],
+      "reference_answer": "pay_api: 下单接口 | pay_callback: 异步回调 | pay_refund: 退款流程",
+      "gold_docs": [
+        "pay_api.md",
+        "pay_callback.md",
+        "pay_refund.md"
+      ]
+    },
+    {
+      "id": "keycases_middle_004",
+      "domain": "retrieval",
+      "capability": [
+        "retrieval"
+      ],
+      "tier": "middle",
+      "difficulty": "medium",
+      "steps": 5,
+      "tools": 3,
+      "instruction": "找出所有迁移脚本（migrations/ 下 .sql 文件）并汇报版本号；migrations/tmp/ 下是草稿不要读",
+      "setup": {
+        "migrations/001_init.sql": "v1: 建表",
+        "migrations/002_add_idx.sql": "v2: 加索引",
+        "migrations/003_arch.sql": "v3: 归档",
+        "migrations/tmp/scratch.sql": "草稿，忽略"
+      },
+      "params": [],
+      "available_tools": [
+        "read",
+        "ls",
+        "find"
+      ],
+      "expected_outcome": "读全 3 个正式迁移，覆盖率=1；tmp/ 干扰",
+      "must_do": [],
+      "must_not_do": [],
+      "verifier": {
+        "fail_to_pass": [
+          {
+            "fn": "retrieval_covered"
+          }
+        ],
+        "pass_to_pass": [
+          {
+            "fn": "file_content_eq",
+            "args": {
+              "path": "migrations/tmp/scratch.sql",
+              "value": "草稿，忽略"
+            }
+          }
+        ]
+      },
+      "grader": {
+        "type": "rule"
+      },
+      "leak_guard": {},
+      "tags": [
+        "retrieval",
+        "nested_dir",
+        "distractor"
+      ],
+      "expectation": "",
+      "env": {
+        "backend": "disk"
+      },
+      "reference_plan": [
+        {
+          "tool": "ls",
+          "args": {
+            "path": "migrations"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/001_init.sql"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/002_add_idx.sql"
+          }
+        },
+        {
+          "tool": "read",
+          "args": {
+            "path": "migrations/003_arch.sql"
+          }
+        }
+      ],
+      "reference_answer": "v1: 建表 | v2: 加索引 | v3: 归档",
+      "gold_docs": [
+        "migrations/001_init.sql",
+        "migrations/002_add_idx.sql",
+        "migrations/003_arch.sql"
+      ]
+    }
+  ],
+  "field_annotations": {
+    "keycases_hard_002": {
+      "instruction": "诊断要点：原始模糊指令『提取并汇报』可被『只 ls/find 列文件名』绕过——答案即文件名本身。本集保留此易错点，观测 agent 是否真 read 内容还是仅列名。",
+      "gold_docs": "retrieval_covered 核心：须 read/open/cat 覆盖 pay_api.md/pay_callback.md/pay_refund.md，覆盖率==1.0 才过",
+      "verifier.fail_to_pass[retrieval_covered]": "轨迹是否用读工具覆盖全部目标文件（不含 ls/find/bash cat）",
+      "verifier.pass_to_pass[file_content_eq]": "回归保护：噪声 risk_model.md 未被篡改",
+      "verifier.pass_to_pass[file_not_exists]": "副作用检查：未产生额外文件(如 pay/_tmp.md)",
+      "reference_answer": "若只列文件名则 human 判『对』但 verifier 判挂——本集正是要暴露这种不一致",
+      "available_tools": "read/ls/find 分工：read 取内容，ls/find 仅定位"
+    },
+    "keycases_middle_004": {
+      "instruction": "诊断要点：原始指令要『汇报版本号』，而版本号就在文件名(001/002/003)里，agent 可只 ls 即得答案、不读内容。保留此易错点观测不 read 行为。",
+      "gold_docs": "retrieval_covered 覆盖目标：3 个正式 .sql",
+      "verifier.fail_to_pass[retrieval_covered]": "轨迹须用 read 覆盖 3 个正式迁移脚本",
+      "verifier.pass_to_pass[file_content_eq]": "tmp/scratch.sql 内容未被改动",
+      "reference_answer": "版本号可由文件名推——本集刻意保留，看 agent 是否读内容",
+      "available_tools": "read/ls/find 分工"
+    }
+  }
+}
