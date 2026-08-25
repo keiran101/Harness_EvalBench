@@ -10,6 +10,8 @@ so we derive tool/args purely from Step.action — no adapter changes.
 from __future__ import annotations
 
 import json
+import re
+import shlex
 from typing import Any, Dict, List, Optional
 
 from ..core import EvalReport, Trajectory
@@ -64,6 +66,86 @@ def _read_path(action: str) -> Optional[str]:
     return arg
 
 
+def _norm_path(p: str) -> str:
+    """Normalize a file path for coverage comparison.
+
+    - backslash -> slash (Windows harnesses emit `spec\\auth.md` while gold is
+      `spec/auth.md`)
+    - strip surrounding quotes/whitespace
+    - drop redundant `./` prefix and trailing slashes
+    """
+    if not p:
+        return p
+    p = p.strip().strip("'\"")
+    p = p.replace("\\", "/")
+    if p.startswith("./"):
+        p = p[2:]
+    while "//" in p:
+        p = p.replace("//", "/")
+    return p.rstrip("/")
+
+
+# Shell content-read commands whose file argument(s) should count as "viewed"
+# for retrieval coverage. Harnesses wrap these as `bash:{"command": "cat ..."}`
+# or `pwsh:{"command": "Get-Content ..."}`, so the tool name ("bash"/"pwsh")
+# would otherwise hide them from coverage (false neg). Covers POSIX shells and
+# PowerShell (Get-Content / its `gc` alias; note `cat` is also a PS alias).
+_BASH_READ_CMDS = {"cat", "tail", "head", "less", "more", "nl", "type", "bat",
+                   "Get-Content", "gc", "sls", "Select-String"}
+
+
+def _looks_like_path(tok: str) -> bool:
+    return ("/" in tok or "." in tok) and not tok.startswith("-") and tok not in ("|", "<", ">", ";", "&")
+
+
+def _bash_read_paths(action: str) -> List[str]:
+    """Extract file paths when a `bash:...` action reads file contents via
+    cat/tail/head/less/more/nl/type/bat.
+
+    Harnesses wrap these as `bash:{"command": "cat ..."}` (JSON) or bare
+    `bash:cat ...`; we resolve the command string first, then token-scan it so
+    we can skip flags like `-n` *and* their numeric argument (`tail -n 1 file`)."""
+    if ":" not in action:
+        return []
+    rest = action.split(":", 1)[1]
+    cmd = None
+    try:
+        obj = json.loads(rest)
+        if isinstance(obj, dict):
+            cmd = obj.get("command") or obj.get("cmd")
+    except Exception:
+        cmd = None
+    if not cmd:
+        cmd = rest
+    try:
+        toks = shlex.split(cmd)
+    except Exception:
+        toks = cmd.split()
+    out: List[str] = []
+    n = len(toks)
+    i = 0
+    while i < n:
+        if toks[i] in _BASH_READ_CMDS:
+            j = i + 1
+            while j < n:
+                t = toks[j]
+                if t.startswith("-"):          # flag, e.g. -n
+                    j += 1
+                    continue
+                if _looks_like_path(t):        # file arg
+                    out.append(t)
+                    j += 1
+                    continue
+                # non-path token: if it directly follows a flag, treat as that
+                # flag's value (e.g. the "1" in `tail -n 1 file`) and skip once.
+                if j > i + 1 and toks[j - 1].startswith("-"):
+                    j += 1
+                    continue
+                break                           # stray token -> stop collecting
+        i += 1
+    return out
+
+
 def _backend(instance) -> str:
     return (getattr(instance, "env", None) or {}).get("backend", "memory")
 
@@ -112,16 +194,23 @@ def retrieval_coverage(traj: Trajectory, instance) -> Dict[str, Any]:
     if not gold or _backend(instance) != "disk":
         return {"value": None, "available": False,
                 "detail": "no gold_docs or non-disk backend"}
+    gold_norm = {_norm_path(g) for g in gold}
     viewed = set()
     for st in traj.steps:
-        if _tool_of(st.action) in READ_TOOLS:
+        tool = _tool_of(st.action)
+        if tool in READ_TOOLS:
             p = _read_path(st.action)
             if p:
-                viewed.add(p)
-    covered = [g for g in gold if g in viewed]
-    value = round(len(covered) / len(gold), 4)
+                viewed.add(_norm_path(p))
+        elif tool in ("bash", "sh", "pwsh", "powershell", "cmd", "shell"):
+            # content-read commands invoked via a shell also count as "viewed"
+            for fp in _bash_read_paths(st.action):
+                viewed.add(_norm_path(fp))
+    covered = sorted(gold_norm & viewed)
+    missed = sorted(gold_norm - viewed)
+    value = 0.0 if not gold_norm else round(len(covered) / len(gold_norm), 4)
     return {"value": value, "available": True,
-            "detail": f"covered={covered}, missed={[g for g in gold if g not in viewed]}"}
+            "detail": f"covered={covered}, missed={missed}"}
 
 
 def cost_latency(traj: Trajectory) -> Dict[str, Any]:
