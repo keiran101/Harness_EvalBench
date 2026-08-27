@@ -69,7 +69,8 @@ def build_registry(datasets: List[str], data_dir: str = DEFAULT_DATA) -> Dataset
 
 def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optional[List[str]] = None,
              k: int = 2, seed_base: int = 0, output: Optional[str] = None,
-             tids: Optional[List[str]] = None, mode: str = "plan") -> dict:
+             tids: Optional[List[str]] = None, mode: str = "plan",
+             max_consecutive_failures: int = 3, failure_cooldown_s: float = 10.0) -> dict:
     """Run the unified evaluation and write the report. Returns the summary dict.
 
     `tids` optionally narrows the agent's default scope (per-agent backend filter).
@@ -113,8 +114,14 @@ def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optiona
         scope = [t for t in scope if t in set(tids)]
     print(f"统一数据池: {len(reg.list_templates())} 模板 | agent={a.name} | "
           f"跑 {len(scope)} 条 | k={k}")
-    ev = Evaluator(reg, a, k=k, seed_base=seed_base, env_factory=make_env_factory())
+    ev = Evaluator(reg, a, k=k, seed_base=seed_base, env_factory=make_env_factory(),
+                   max_consecutive_failures=max_consecutive_failures,
+                   failure_cooldown_s=failure_cooldown_s)
     summary = ev.evaluate(tids=tids)
+
+    if summary.get("aborted"):
+        import sys
+        print(f"\n⚠️ 评估被熔断中止：{summary['aborted']}", file=sys.stderr)
 
     o = summary["overall"]
     n = len(scope) * k
@@ -171,12 +178,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--tids", default=None,
                    help="comma-separated template ids to run (default: all in scope)")
     p.add_argument("--output", default=None, help="report output path (default: project root)")
+    p.add_argument("--max-consecutive-failures", type=int, default=3,
+                   help="连续相同执行错误达此数则判疑似环境问题、熔断中止（0=不熔断）")
+    p.add_argument("--failure-cooldown-s", type=float, default=10.0,
+                   help="单样本崩溃后等待秒数再继续（让本地慢端点恢复；0=不等待）")
     args = p.parse_args(argv)
 
     run_eval(agent=args.agent, strategy=args.strategy, mode=args.mode,
              datasets=[d.strip() for d in args.datasets.split(",") if d.strip()],
              k=args.k, seed_base=args.seed_base, output=args.output,
-             tids=[x.strip() for x in args.tids.split(",") if x.strip()] if args.tids else None)
+             tids=[x.strip() for x in args.tids.split(",") if x.strip()] if args.tids else None,
+             max_consecutive_failures=args.max_consecutive_failures,
+             failure_cooldown_s=args.failure_cooldown_s)
     return 0
 
 

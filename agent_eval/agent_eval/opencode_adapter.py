@@ -50,7 +50,9 @@ def _render_eval_config(base_url: str, model: str) -> str:
                 "models": {model: {"name": model.split("/")[-1]}},
             }
         },
-        "plugin": [os.path.join(CONFIG_DIR, "opencode_slim.ts")],
+        "plugin": ([os.path.join(CONFIG_DIR, "opencode_slim.ts")]
+                   if os.environ.get("OPENCODE_SLIM", "1") not in ("0", "false", "off", "")
+                   else []),
         "permission": {
             "edit": "allow",
             "bash": "allow",

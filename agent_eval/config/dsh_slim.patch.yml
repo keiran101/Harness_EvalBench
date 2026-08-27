@@ -1,0 +1,44 @@
+# dsh_slim.patch.yml — agent_eval 评估用 slim 覆盖（等价 opencode_slim.ts）
+#
+# 作用：把注入 LLM 的工具面压到「检索相关最小集」，并把「先读再答」前置为铁律。
+# 机制：dsh harness 的 --patch 是 cordis 组合叠加 yml（与 agent.cordis.yml 同格式），
+#       本文件由 deepseek_adapter.py 在生成 --patch 时追加到「模型重钉」之后，
+#       运行时生效、无需重建 harness。
+#
+# 工具面裁剪（保留 read/write/edit/glob/grep/bash/pwsh，禁用其余编排/外围工具）：
+#   禁用后 LLM 可见工具从 25 个降到 ~12 个，减少工具清单对 read 规则的注意力稀释，
+#   同时消除 glob/ls 列目录即作答的捷径诱惑。
+# 读取纪律：覆盖 headless 预设的 persona，明确「glob/ls/grep 是发现不是读取」。
+
+# ── 1) 强化 read 纪律（覆盖 headless preset 的 persona） ───────────────────
+- id: system-prompt
+  config:
+    persona: >-
+      You are a coding agent powered by the {{model}} model. Your working directory is {{cwd}}.
+      IMPORTANT: Before answering any question about file contents, you MUST call the read tool to actually read the relevant file(s). Using glob/ls/grep or a shell to list or search files is discovery, NOT reading — it does NOT count as having read the content. Never answer from directory listings or prior knowledge alone; read the file first, then answer.
+
+# ── 2) 裁剪非检索工具面 ───────────────────────────────────────────────────────
+- id: tool-jobs
+  disabled: true
+- id: skill-filesystem
+  disabled: true
+- id: tool-skill
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: tool-subagent-control
+  disabled: true
+- id: tool-subagent-list-agents
+  disabled: true
+- id: tool-subagent
+  disabled: true
+- id: tool-subagent-fork
+  disabled: true
+- id: tool-ralph
+  disabled: true
+- id: tool-ask-user
+  disabled: true
+- id: tool-todo
+  disabled: true
+- id: tool-web
+  disabled: true

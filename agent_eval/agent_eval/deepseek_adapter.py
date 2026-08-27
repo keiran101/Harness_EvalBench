@@ -82,6 +82,15 @@ class DeepSeekHarnessAdapter:
 
     def _call_cli(self, cwd: str, instruction: str) -> dict:
         patch_content = _PATCH_TEMPLATE.format(model=self.llm_model)
+        # slim 覆盖：裁剪工具面 + 强化 read 纪律（等价 opencode_slim.ts）。
+        # 由 config/dsh_slim.patch.yml 提供，运行时追加到模型重钉之后。
+        slim_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "config", "dsh_slim.patch.yml",
+        )
+        if os.path.exists(slim_path):
+            with open(slim_path, "r", encoding="utf-8") as sf:
+                patch_content += "\n" + sf.read()
         fd, patch_path = tempfile.mkstemp(suffix=".yml", prefix="dsh_eval_patch_")
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(patch_content)
