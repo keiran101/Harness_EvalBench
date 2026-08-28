@@ -64,7 +64,7 @@ def test_all_base_templates_leak_wired():
 def test_load_from_external_dir_matches_code():
     """Externalized datasets (JSON) reload identically to the built-in code set."""
     here = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(here, "..", "agent_eval", "datasets", "data", "base")
+    data_dir = os.path.join(here, "..", "data", "base")
     reg = DatasetRegistry.from_dir(data_dir, version="ext")
     assert len(reg.list_templates()) == 15
     # leak_guard is wired on load even though files are clean

@@ -5,7 +5,7 @@ base = basic, simple harness capabilities; each task probes ONE or a few capabil
 All are tier='base', steps<=2, tools=1 (spec §2).
 
 Check specs use {"fn": <registered name>, "args": {...}} resolved in checks.py, so
-this module is pure data and can be mirrored 1:1 by datasets/data/*.json. The
+this module is pure data and can be mirrored 1:1 by data/*.json. The
 leak_guard red line is wired at registration time (registry.with_base).
 """
 

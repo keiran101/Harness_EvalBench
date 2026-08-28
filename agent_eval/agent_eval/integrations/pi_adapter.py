@@ -27,11 +27,11 @@ import os
 import subprocess
 from typing import Dict, List, Optional
 
-from .core import Step, Trajectory
-from .datasets.templates import TaskInstance
-from .environments.env import Env
+from ..core import Step, Trajectory
+from ..datasets.templates import TaskInstance
+from ..environments.env import Env
 
-BRIDGE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bridge", "pi_bridge.ts")
+BRIDGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pi_bridge.ts")
 PI_ROOT = os.environ.get("PI_ROOT", r"D:/MyFiles/agent-harness/pi-main")
 LLM_BASE_URL = os.environ.get("LLM_EVAL_BASE_URL", "http://8.134.63.180:7010")
 LLM_MODEL = os.environ.get("LLM_EVAL_MODEL", "google/gemma-4-12b-qat")

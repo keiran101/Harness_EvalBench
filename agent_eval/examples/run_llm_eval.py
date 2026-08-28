@@ -35,7 +35,7 @@ def main() -> None:
     args = ap.parse_args()
 
     reg = DatasetRegistry.from_dir(
-        os.path.join(os.path.dirname(__file__), "..", "agent_eval", "datasets", "data", "base"))
+        os.path.join(os.path.dirname(__file__), "..", "data", "base"))
     tids = [t.id for t in reg.list_templates()]
     if args.tids:
         keep = {x.strip() for x in args.tids.split(",") if x.strip()}

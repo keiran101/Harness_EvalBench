@@ -19,11 +19,11 @@ import os
 import subprocess
 from typing import Dict, List, Optional
 
-from .core import Step, Trajectory
-from .datasets.templates import TaskInstance
-from .environments.env import Env
+from ..core import Step, Trajectory
+from ..datasets.templates import TaskInstance
+from ..environments.env import Env
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
+CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config")
 EVAL_CONFIG = os.path.join(CONFIG_DIR, "opencode_eval.json")
 OPENCODE_ROOT = os.environ.get("OPENCODE_ROOT", r"D:/MyFiles/agent-harness/opencode-dev")
 BUN = os.environ.get("BUN_BIN", r"D:/common/develop/Nodejs/node_global/node_modules/bun/bin/bun.exe")

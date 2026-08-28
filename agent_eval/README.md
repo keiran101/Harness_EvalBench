@@ -43,7 +43,7 @@ demo 输出（k=4，15 个 base 模板）：
   - **硬否决 `must_not_do`**：任一为 False（不安全）即整体失败，对应"不可逆动作未经确认"等红线；与 `fail_to_pass`/`pass_to_pass` 并列。
   - `available_tools` 声明该任务暴露的工具面（防作弊+可复现）；`grader` 自描述评分方式（rule/llm/custom）。
   - 检查以 **check spec** 表达：`{"fn": <注册名>, "args": {...}}`，逻辑在 `datasets/checks.py` 的 `CHECK_REGISTRY`，故数据集文件可纯数据序列化。
-- **数据集外置存储**：base 15 个模板已从代码拆出，存于 `agent_eval/datasets/data/base/*.json`（每能力一文件，版本可控、可 diff）。`DatasetRegistry.from_file/from_dir` 加载；`with_base()` 仍作为内置默认集。加载时自动 `wire_leak_guard`（canary/新鲜度/隔离）。
+- **数据集外置存储**：base 15 个模板已从代码拆出，存于 `data/base/*.json`（每能力一文件，版本可控、可 diff）。`DatasetRegistry.from_file/from_dir` 加载；`with_base()` 仍作为内置默认集。加载时自动 `wire_leak_guard`（canary/新鲜度/隔离）。
 - **防泄漏红线（已接线）**：canary GUID（同时嵌入 instruction 作诱饵）+ 时间新鲜度 + 隔离标记 + 随机实例参数。可复用的是**环境的构造机制**，不是具体题目。
 
 ```python
@@ -51,7 +51,7 @@ from agent_eval.datasets.registry import DatasetRegistry
 # 内置默认集
 reg = DatasetRegistry.with_base()
 # 或外置文件集（推荐增长方式）
-reg = DatasetRegistry.from_dir("agent_eval/datasets/data/base")
+reg = DatasetRegistry.from_dir("data/base")
 inst = reg.instantiate("base_tool_call_001", seed=7)   # 参数化实例
 result = reg.verify(inst, final_state, trajectory)      # 双检 + 硬否决
 ```
@@ -64,12 +64,17 @@ result = reg.verify(inst, final_state, trajectory)      # 双检 + 硬否决
 
 ### 接入外部 agent（如 pi coding-agent）：桥在框架侧，被测对象只读
 
-设计原则：**评估不污染被测对象**（第六章隔离精神）——所有适配代码都在 `agent_eval/bridge/` 内，被测项目目录零写入。
+设计原则：**评估不污染被测对象**（第六章隔离精神）——所有外部 agent 接入代码统一收口在 `agent_eval/integrations/` 内（pi 白盒桥 + opencode/deepseek 黑盒 adapter 平级），被测项目目录零写入。`datasets/data` 已外置到仓库根 `data/`，框架代码与评测数据分离。
 
 ```
-agent_eval/bridge/pi_bridge.ts   # TS 桥：驱动 pi 真实 AgentSession（plan 注入 / llm 真实模型双模式）
-agent_eval/agent_eval/pi_adapter.py  # Python 适配器：subprocess 调桥，PI_ROOT 定位被测源码
+agent_eval/integrations/pi_bridge.ts           # TS 白盒桥：驱动 pi 真实 AgentSession（plan 注入 / llm 真实模型双模式）
+agent_eval/integrations/pi_adapter.py          # Python 适配器：subprocess 调桥，PI_ROOT 定位被测源码
+agent_eval/integrations/opencode_adapter.py    # opencode 接入（黑盒 CLI）
+agent_eval/integrations/deepseek_adapter.py    # deepseek 接入（黑盒 CLI）
+agent_eval/integrations/config/                # 各产品接入配置（opencode/dsh 的 slim 与 provider）
 ```
+
+数据集（评测任务 JSON）位于仓库根 `data/` 下，按域分目录：`data/base`、`data/biz`、`data/coding`、`data/retrieval`、`data/keycases`。
 
 - 桥通过 `PI_ROOT` 环境变量（默认 `D:/MyFiles/agent-harness/pi-main`）动态 import 被测对象源码，**不写入、不修改被测项目**。
 - 被测项目只需一次性环境准备（`npm install` + build 其 dist），属运行依赖而非代码修改。
@@ -92,7 +97,7 @@ agent_eval/agent_eval/pi_adapter.py  # Python 适配器：subprocess 调桥，PI
 三条硬规则：
 1. **跨 agent_type 的 Pass@k/Pass^k 不可直接比较**（数据集范围、决策来源都不同）；同 agent_type 不同 `dataset_scope` / `k` / `mode` 也不可比。
 2. 主判据永远是**确定性环境状态验证**（二元），`judge` 分数是附加质量维度，0/1（dummy）与 0~1（llm-real）尺度不同。
-3. **模板 id 跨目录可能同名异义**：`datasets/data/base/` 与 `datasets/data/biz/` 均含 `base_clarify_001` 等 id 但内容不同；`from_dirs` 同池内重复 id 会报错，跨池同名仍需以 `dataset_scope` 区分。
+3. **模板 id 跨目录可能同名异义**：`data/base/` 与 `data/biz/` 均含 `base_clarify_001` 等 id 但内容不同；`from_dirs` 同池内重复 id 会报错，跨池同名仍需以 `dataset_scope` 区分。
 4. **工具面不限定（默认满血评估）**：工具是 harness 的一部分，verifier 只查最终环境状态 + 过程硬约束（confirm/clarify 等），**不校验轨迹调用的工具是否属于任务声明的 `available_tools`**——`available_tools` 是声明性字段（描述任务预期工具面），不参与判定。因此被测 agent 用其完整工具面（含数据集未声明、但 harness 自带的工具）完成任务是**允许且被计入其真实能力**的；横向对比时，工具面差异属于被测 harness 的能力差异，如实反映在分数里。`available_tools` 字段保留（用于数据集可读性/后续可选"限定工具"模式），但当前**不实现**限定工具的分支。
 
 CLI：`python -m agent_eval --agent mock|llm|pi`；pi 真实模型：`--agent pi --mode llm`（走 `LLM_EVAL_BASE_URL` / `LLM_EVAL_MODEL`，plan 模式只作对照基线）。llm 示例：`--agent llm --datasets base --k 2`。

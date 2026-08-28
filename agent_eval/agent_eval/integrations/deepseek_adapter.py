@@ -24,9 +24,9 @@ import subprocess
 import tempfile
 from typing import Dict, List, Optional
 
-from .core import Step, Trajectory
-from .datasets.templates import TaskInstance
-from .environments.env import Env
+from ..core import Step, Trajectory
+from ..datasets.templates import TaskInstance
+from ..environments.env import Env
 
 DSH_ROOT = os.environ.get("DSH_ROOT", r"D:/MyFiles/agent-harness/deepseek-harness-master")
 NODE = os.environ.get("NODE_BIN", r"C:/Users/86132/.workbuddy/binaries/node/versions/22.22.2/node.exe")
@@ -91,7 +91,7 @@ class DeepSeekHarnessAdapter:
         # 由 DSH_SLIM 开关控制（默认开）；关闭时不注入，评估满血工具面。
         # 文件缺失则即便开关开也不注入（安全兜底，避免静默行为漂移）。
         slim_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
+            os.path.dirname(__file__),
             "config", "dsh_slim.patch.yml",
         )
         if self.slim and os.path.exists(slim_path):

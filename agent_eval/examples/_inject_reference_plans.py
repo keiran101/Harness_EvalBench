@@ -129,9 +129,9 @@ def main():
     import os
 
     injected, missing = 0, []
-    for fp in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..",
-                                            "agent_eval", "datasets", "data",
-                                            "coding", "*.json"))):
+      for fp in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..",
+                                              "data",
+                                              "coding", "*.json"))):
         d = json.load(open(fp, encoding="utf-8"))
         for t in (d["templates"] if isinstance(d, dict) and "templates" in d else d):
             if t["id"] in PLANS:

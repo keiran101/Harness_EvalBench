@@ -35,7 +35,7 @@ from .datasets.registry import DatasetRegistry
 from .evaluator import Evaluator, make_env_factory
 
 DEFAULT_DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                            "agent_eval", "datasets", "data")
+                            "data")
 # Git root (D:\dev\eval): the generated eval_*.json outputs must land here, NOT
 # inside the package dir, so they stay out of `git add agent_eval/`.
 GIT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -92,18 +92,18 @@ def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optiona
                  if (t.env or {}).get("backend", "memory") == "memory"]
         default_out = _default_out("eval_llm_" + "_".join(datasets))
     elif agent == "pi":
-        from .pi_adapter import PiAgentAdapter
+        from .integrations.pi_adapter import PiAgentAdapter
         a = PiAgentAdapter(strategy=strategy, mode=mode)
         # pi is a coding agent -> only disk-backed templates flow through it
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
         default_out = _default_out("eval_pi_" + mode + "_" + "_".join(datasets))
     elif agent == "opencode":
-        from .opencode_adapter import OpenCodeAgentAdapter
+        from .integrations.opencode_adapter import OpenCodeAgentAdapter
         a = OpenCodeAgentAdapter()
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
         default_out = _default_out("eval_opencode_" + "_".join(datasets))
     elif agent == "deepseek":
-        from .deepseek_adapter import DeepSeekHarnessAdapter
+        from .integrations.deepseek_adapter import DeepSeekHarnessAdapter
         a = DeepSeekHarnessAdapter()
         scope = [t.id for t in reg.list_templates() if t.env.get("backend") == "disk"]
         default_out = _default_out("eval_deepseek_" + "_".join(datasets))
@@ -173,7 +173,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                    help="pi model decision mode: plan=deterministic reference_plan, "
                         "llm=real LLM via LLM_EVAL_BASE_URL/LLM_EVAL_MODEL")
     p.add_argument("--datasets", default="biz,coding",
-                   help="comma-separated file-isolated dataset dirs under datasets/data/")
+                   help="comma-separated file-isolated dataset dirs under data/")
     p.add_argument("--k", type=int, default=2, help="independent samples per template")
     p.add_argument("--seed-base", type=int, default=0, help="seed base for sampling")
     p.add_argument("--tids", default=None,

@@ -15,7 +15,7 @@ from agent_eval.datasets.registry import DatasetRegistry
 from agent_eval.environments.env import Env
 from agent_eval.llm_agent import LLMToolAgent, RealLLMJudge
 
-BASE = os.path.join(os.path.dirname(__file__), "..", "agent_eval", "datasets", "data", "base")
+BASE = os.path.join(os.path.dirname(__file__), "..", "data", "base")
 TIDS = ["base_tool_call_001", "base_state_read_001", "base_error_recovery_001",
         "base_clarify_001", "base_confirm_001", "base_confirm_002"]
 
