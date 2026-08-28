@@ -135,6 +135,7 @@ def run_eval(agent: str = "mock", strategy: str = "reference", datasets: Optiona
         "model": getattr(a, "model", None) or (a.llm_model if agent == "pi" and mode == "llm" else None),
         "judge": "dummy-verifier",               # verifier is the sole pass/fail authority
         "verifier": "deterministic-env-state",
+        "tool_surface": getattr(a, "tool_surface", "unknown"),  # slim | full（工具面裁剪口径）
         "dataset_scope": datasets,               # which file-isolated dirs were merged
         "templates_run": len(scope),             # after per-agent backend filter + --tids
         "k": k,

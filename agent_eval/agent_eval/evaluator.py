@@ -8,6 +8,7 @@ score, and aggregates a report with k-scope / sample-size / env / unfinished dis
 from __future__ import annotations
 
 import logging
+import sys
 import time
 from time import perf_counter
 from typing import Any, Callable, Dict, List, Optional
@@ -192,6 +193,8 @@ class Evaluator:
 
         summary = summarize(all_reports, self.k)
         summary["agent"] = getattr(self.agent, "name", "unknown")
+        # 工具面口径（slim/full），由各 adapter 在 __init__ 自识别，便于评估分析区分。
+        summary["tool_surface"] = getattr(self.agent, "tool_surface", "unknown")
         summary["templates"] = per_template
         summary["process_metrics"] = aggregate_averages(all_reports)
         summary["robustness"] = {tid: per_template[tid]["robustness"]

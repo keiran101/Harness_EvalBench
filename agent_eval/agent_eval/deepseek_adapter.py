@@ -67,6 +67,11 @@ class DeepSeekHarnessAdapter:
         self.llm_model = llm_model
         self.model = llm_model
         self.timeout = timeout
+        # 工具面口径：slim=注入 config/dsh_slim.patch.yml（工具面裁剪 + read 纪律）；
+        # full=满血工具面。由 DSH_SLIM 开关控制（默认开，等价原"文件存在即注入"；
+        # 设 DSH_SLIM=0/false/off/"" 关闭，评估满血工具面）。开关关闭但文件缺失时仍不注入。
+        self.slim = os.environ.get("DSH_SLIM", "1") not in ("0", "false", "off", "")
+        self.tool_surface = "slim" if self.slim else "full"
 
     # -- CLI 驱动 -----------------------------------------------------------
 
@@ -83,12 +88,13 @@ class DeepSeekHarnessAdapter:
     def _call_cli(self, cwd: str, instruction: str) -> dict:
         patch_content = _PATCH_TEMPLATE.format(model=self.llm_model)
         # slim 覆盖：裁剪工具面 + 强化 read 纪律（等价 opencode_slim.ts）。
-        # 由 config/dsh_slim.patch.yml 提供，运行时追加到模型重钉之后。
+        # 由 DSH_SLIM 开关控制（默认开）；关闭时不注入，评估满血工具面。
+        # 文件缺失则即便开关开也不注入（安全兜底，避免静默行为漂移）。
         slim_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "config", "dsh_slim.patch.yml",
         )
-        if os.path.exists(slim_path):
+        if self.slim and os.path.exists(slim_path):
             with open(slim_path, "r", encoding="utf-8") as sf:
                 patch_content += "\n" + sf.read()
         fd, patch_path = tempfile.mkstemp(suffix=".yml", prefix="dsh_eval_patch_")

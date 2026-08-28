@@ -98,6 +98,9 @@ class PiAgentAdapter:
         self.llm_base_url = llm_base_url
         self.llm_model = llm_model
         self.llm_max_tokens = llm_max_tokens
+        # pi 无工具面裁剪概念：真实 pi 工具面即其满血基准。
+        self.slim = False
+        self.tool_surface = "full"
 
     def _call_bridge(self, cwd: str, instruction: str, plan: List[dict],
                      answer: str) -> dict:

@@ -75,6 +75,10 @@ class OpenCodeAgentAdapter:
         self.llm_model = llm_model
         self.model = llm_model
         self.timeout = timeout
+        # 工具面口径：slim=注入 opencode_slim.ts 裁剪工具 schema（默认开）；
+        # full=满血工具面（设 OPENCODE_SLIM=0 关闭）。与 _build_config 的判定一致。
+        self.slim = os.environ.get("OPENCODE_SLIM", "1") not in ("0", "false", "off", "")
+        self.tool_surface = "slim" if self.slim else "full"
         self._cfg_path: Optional[str] = None
 
     # -- CLI 驱动 -----------------------------------------------------------
