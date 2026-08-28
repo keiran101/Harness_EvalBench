@@ -27,6 +27,10 @@ papers/*.pdf
 # Docs (local only, not synced to GitHub)
 docs/
 
+# Reports: version-controlled locally in a nested standalone git repo under
+# reports/ (no remote). Excluded from this parent repo so they stay off GitHub.
+reports/
+
 # Context-capture investigation: source + report are tracked; captured runtime
 # dumps (regenerable agent-session contexts) are local-only, like results/
 context_capture/run1/dsh/
