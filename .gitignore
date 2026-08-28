@@ -26,3 +26,10 @@ papers/*.pdf
 
 # Docs (local only, not synced to GitHub)
 docs/
+
+# Context-capture investigation: source + report are tracked; captured runtime
+# dumps (regenerable agent-session contexts) are local-only, like results/
+context_capture/run1/dsh/
+context_capture/run1/oc/
+context_capture/run1/pi/
+context_capture/run_full_oc/oc/
